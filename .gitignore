@@ -11,6 +11,11 @@ wp-content/*
 # ignore these plugins
 wp-content/plugins/hello.php
 
+# ignore freemius integration
+freemius/
+freemius_integration.php
+
+
 # ignore specific themes
 wp-content/themes/twenty*/
 
@@ -21,3 +26,4 @@ node_modules/
 *.log
 *.sql
 *.sqlite
+

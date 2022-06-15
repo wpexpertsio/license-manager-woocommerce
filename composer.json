@@ -1,0 +1,32 @@
+{
+    "autoload": {
+        "psr-4": {
+            "LicenseManagerForWooCommerce\\": "includes/",
+            "LicenseManagerForWooCommerce\\Abstracts\\": "includes/abstracts",
+            "LicenseManagerForWooCommerce\\API\\": "includes/api",
+            "LicenseManagerForWooCommerce\\API\\v1\\": "includes/api/v1",
+            "LicenseManagerForWooCommerce\\API\\v2\\": "includes/api/v2",
+            "LicenseManagerForWooCommerce\\Controllers\\": "includes/controllers",
+            "LicenseManagerForWooCommerce\\Enums\\": "includes/enums",
+            "LicenseManagerForWooCommerce\\Integrations\\": "includes/integrations",
+            "LicenseManagerForWooCommerce\\Integrations\\WooCommerce\\": "includes/integrations/woocommerce",
+            "LicenseManagerForWooCommerce\\Integrations\\WooCommerce\\Emails\\": "includes/integrations/woocommerce/emails",
+            "LicenseManagerForWooCommerce\\Interfaces\\": "includes/interfaces",
+            "LicenseManagerForWooCommerce\\Lists\\": "includes/lists",
+            "LicenseManagerForWooCommerce\\Models\\": "includes/models",
+            "LicenseManagerForWooCommerce\\Models\\Resources\\": "includes/models/resources",
+            "LicenseManagerForWooCommerce\\Repositories\\": "includes/repositories",
+            "LicenseManagerForWooCommerce\\Repositories\\Resources\\": "includes/repositories/resources",
+            "LicenseManagerForWooCommerce\\Settings\\": "includes/settings"
+        }
+    },
+    "require": {
+        "defuse/php-encryption": "^2.2",
+        "setasign/fpdf": "^1.8",
+        "ext-openssl": "*",
+        "ext-json": "*"
+    },
+    "config": {
+        "optimize-autoloader": true
+    }
+}

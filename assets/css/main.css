@@ -1,0 +1,252 @@
+/* Variables */
+:root {
+	--color-primary: #007bff;
+	--color-secondary: #6c757d;
+	--color-success: #28a745;
+	--color-danger: #dc3545;
+	--color-warning: #ffc107;
+	--color-info: #17a2b8;
+	--color-light: #f8f9fa;
+	--color-dark: #343a40;
+	--color-grey-1: #E1E1E1;
+}
+
+/* Text colors */
+.text-primary {
+	color: var(--color-primary);
+}
+.text-secondary {
+	color: var(--color-secondary);
+}
+.text-success {
+	color: var(--color-success);
+}
+.text-danger {
+	color: var(--color-danger);
+}
+.text-warning {
+	color: var(--color-warning);
+}
+.text-info {
+	color: var(--color-info);
+}
+.text-light {
+	color: var(--color-light);
+}
+.text-dark {
+	color: var(--color-dark);
+}
+
+/* Table auto-width fix */
+table.wp-list-table.generators,
+table.wp-list-table.generatoren,
+table.wp-list-table.licensekeys,
+table.wp-list-table.lizenzschlssel {
+	table-layout: auto !important;
+}
+
+/* License table */
+table.wp-list-table.licensekeys td.source.column-source > span,
+table.wp-list-table.lizenzschlssel td.source.column-source > span {
+	font-size: 2em;
+}
+.lmfwc-license-key-show,
+.lmfwc-license-key-hide {
+	cursor: pointer;
+}
+
+table.wp-list-table.licensekeys td.source.column-source,
+table.wp-list-table.lizenzschlssel td.source.column-source,
+table.wp-list-table.licensekeys td.valid_for.column-valid_for,
+table.wp-list-table.lizenzschlssel td.valid_for.column-valid_for {
+	vertical-align: middle;
+	text-align: center;
+}
+table.wp-list-table.licensekeys td.status.column-status,
+table.wp-list-table.lizenzschlssel td.status.column-status {
+	vertical-align: middle;
+	text-align: left;
+}
+table.wp-list-table.licensekeys span.lmfwc-date,
+table.wp-list-table.lizenzschlssel span.lmfwc-date {
+	display: inline-block;
+	min-width: 100px;
+	text-align: center;
+}
+
+/** License Key Placeholder */
+.lmfwc-placeholder {
+	display: inline-block;
+	font-family: Consolas, monospace;
+	font-weight: 400;
+	min-width: 150px;
+	min-height: 20px;
+	text-align: center;
+	position: relative;
+	line-height: 20px;
+	padding: 3px 10px 2px;
+	margin-left: 25px;
+	border-top-right-radius: 3px;
+	border-bottom-right-radius: 3px;
+	cursor: pointer;
+}
+.lmfwc-placeholder:hover {
+	background-image: linear-gradient(to right, #c0c0c0, #8c8c8c);
+	color: #ffffff;
+}
+.lmfwc-placeholder:before {
+	font-family: 'dashicons', sans-serif;
+	content: "\f112";
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: -25px;
+	width: 25px;
+	background-color: #c0c0c0;
+	color: #ffffff;
+	line-height: 25px;
+	border-top-left-radius: 3px;
+	border-bottom-left-radius: 3px;
+}
+
+.lmfwc-placeholder.empty:after {
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	content: 'XXXX-XXXX-XXXX-XXXX';
+	color: rgba(0,0,0,.4);
+	line-height: 25px;
+}
+.lmfwc-placeholder.empty:hover:after {
+	color: #ffffff;
+}
+.lmfwc-spinner {
+	opacity: 0;
+	margin-left: 5px;
+}
+.lmfwc-clipboard {
+	font-family: Consolas, monospace;
+	background-color: #f0f0f0;
+	color: #334;
+	padding: 7px 14px;
+	border: 1px solid rgba(0,0,0,.1);
+	border-radius: 3px;
+	opacity: 1;
+	-webkit-box-shadow: 2px 3px 5px rgba(0,0,0,.1);
+			box-shadow: 2px 3px 5px rgba(0,0,0,.1);
+	-webkit-transition: all .5s ease-out;
+		 -o-transition: all .5s ease-out;
+			transition: all .5s ease-out;
+}
+
+/* Source Icons */
+.lmfwc-source-icon {
+	max-width: 24px;
+	max-height: 24px;
+}
+
+/* Custom status */
+.lmfwc-status {
+	padding: 3px 6px;
+	position: relative;
+	font-weight: 600;
+	border-radius: 3px;
+	cursor: default;
+	border: 2px solid transparent;
+	color: #6f6f6f;
+	min-width: 90px;
+}
+.lmfwc-status.sold {
+	border: 2px solid var(--color-info);
+	color: var(--color-info);
+}
+.lmfwc-status.sold > span.dashicons {
+	color: var(--color-info);
+}
+
+.lmfwc-status.delivered {
+	border: 2px solid var(--color-success);
+	color: var(--color-success);
+}
+.lmfwc-status.delivered > span.dashicons {
+	color: var(--color-success);
+}
+
+.lmfwc-status.active {
+	border: 2px solid var(--color-primary);
+	color: var(--color-primary);
+}
+.lmfwc-status.active > span.dashicons {
+	color: var(--color-primary);
+}
+
+.lmfwc-status.inactive {
+	border: 2px solid var(--color-grey-1);
+	color: var(--color-grey-1);
+}
+.lmfwc-status.inactive > span.dashicons {
+	color: var(--color-grey-1);
+}
+.lmfwc-status.expired {
+	border: 2px solid var(--color-danger);
+	color: var(--color-danger);
+}
+.lmfwc-status.expired > span.dashicons {
+	color: var(--color-danger);
+}
+
+.lmfwc-status.activation.done,
+.lmfwc-status.activation.done > span.dashicons {
+	color: var(--color-info);
+}
+
+/** My Account **/
+.lmfwc-myaccount-license-key {
+	font-family: Consolas, monospace;
+	font-size: 13px;
+}
+
+/** Custom icons **/
+.lmfwc-icons {
+	width: 20px;
+	height: 20px;
+	display: inline-block;
+}
+.lmfwc-icons:before {
+	font-family: woocommerce;
+	text-align: center;
+	display: inline-block;
+	width: 100%;
+	position: relative;
+	top: 1px;
+}
+.lmfwc-icons.delivered:before {
+	content: "\e01a";
+}
+
+/** Badges **/
+.lmfwc-badge {
+	display: inline-block;
+	border-radius: 50%;
+	width: 15px;
+	height: 15px;
+	line-height: 15px;
+	text-align: center;
+	padding: 2px;
+	margin-left: .5em;
+	cursor: default;
+}
+.lmfwc-badge.info {
+	background-color: var(--color-info);
+	color: #ffffff;
+}
+
+/** Licenses page dropdown width fix **/
+.wrap.lmfwc #filter-by-order-id + .select2-container,
+.wrap.lmfwc #filter-by-user-id + .select2-container,
+.wrap.lmfwc #filter-by-product-id + .select2-container {
+	width: auto !important;
+	max-width: 10rem;
+}

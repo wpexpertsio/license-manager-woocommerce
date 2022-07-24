@@ -1,4 +1,4 @@
-![License Manager for WooCommerce](https://ps.w.org/license-manager-for-woocommerce/assets/banner-772x250.png?rev=2617712)
+![License Manager for WooCommerce](https://ps.w.org/license-manager-woocommerce/assets/banner-772x250.png?rev=2617712)
 
 ## Description ##
 The License Manager for WooCommerce allows you to easily sell and manage Digital License Keys. With features like the bulk importer, automatic delivery, automatic stock management, and database encryption, your business will now run easier than ever.

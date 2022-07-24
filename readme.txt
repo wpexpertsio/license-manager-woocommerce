@@ -96,7 +96,7 @@ Of course! The plugin comes with REST API routes which allow you to activate, de
 
 == Changelog ==
 
-[See changelog for all versions](https://raw.githubusercontent.com/wpexpertsio/license-manager-for-woocommerce/master/CHANGELOG.md).
+[See changelog for all versions](https://raw.githubusercontent.com/wpexpertsio/license-manager-woocommerce/master/CHANGELOG.md).
 
 == Upgrade Notice ==
 

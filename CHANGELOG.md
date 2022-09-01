@@ -1,3 +1,6 @@
+##### 2.2.8 - 2022-08-23
+* Update - Upgrade Menu Added
+
 ##### 2.2.7 - 2022-04-26
 * Update - Changed main menu structure.
 * Update - Moved License Keys inside WooCommerce menu

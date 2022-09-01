@@ -2,8 +2,8 @@
 Contributors: wpexpertsio
 Tags: license key, license, key, software license, serial key, manager, woocommerce, wordpress
 Requires at least: 4.7
-Tested up to: 6.0
-Stable tag: 2.2.7
+Tested up to: 6.0.1
+Stable tag: 2.2.8
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -16,16 +16,30 @@ The **License Manager for WooCommerce** allows you to easily sell and manage all
 
 #### Key features
 
-* Automatically sell and deliver license keys through WooCommerce
-* Automatically manage the stock for licensed products
-* Activate, deactivate, and check your licenses through the REST API
-* Manually resend license keys
-* Add and import license keys and assign them to WooCommerce products
-* Import license keys by file upload
-* Export license keys as PDF or CSV
-* Manage the status of your license keys
-* Create license key generators with custom parameters
+* Automatically sell and deliver license keys through WooCommerce.
+* Automatically manage the stock for licensed products.
+* Activate, deactivate, and check your licenses through the REST API.
+* Manually resend license keys.
+* Add and import license keys and assign them to WooCommerce products.
+* All licenses are encrypted to prevent unauthorized use.
+* Administrators can activate or deactivate user accounts.
+* Allows users to add duplicate license keys into the database.
+* The order status tab provides license key delivery settings.
+* Import license keys by file upload.
+* Export license keys as PDF or CSV. 
+* Manage the status of your license keys.
+* Create license key generators with custom parameters.
 * Assign a generator to one (or more!) WooCommerce product(s), these products then automatically create a license key whenever they are sold.
+
+= License Manager for WooCommerce Pro = 
+License Manager for WooCommerce Pro allows you to enhance the capabilities for your eCommerce website with features like:
+
+* **Download Expires** - Download expired products and generates new license keys.
+* **Product Download Detail** - Enters a change log and product version from the settings.
+* **Validate Customer Licenses** - Validate customer licenses using their ID.
+* **Ping Request** - Create a ping request to check the client-server connection.
+
+View License Manager for WooCommerce Pro [pricing plans](https://www.licensemanager.at/pricing/).
 
 #### API
 
@@ -93,12 +107,16 @@ Of course! The plugin comes with REST API routes which allow you to activate, de
 5. WooCommerce variable product options.
 6. The generators overview page.
 7. Create a new license key generator.
+8. REST API
 
 == Changelog ==
 
 [See changelog for all versions](https://raw.githubusercontent.com/wpexpertsio/license-manager-for-woocommerce/master/CHANGELOG.md).
 
 == Upgrade Notice ==
+
+= 2.2.8 =
+Update - Upgrade Menu Added
 
 = 2.2.7 =
 Plugin structural changes

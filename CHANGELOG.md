@@ -1,3 +1,6 @@
+##### 2.2.9 - 2022-06-28
+* Tested up to WooCommerce v7.8.0 and WordPress v6.2.2
+* 
 ##### 2.2.8 - 2022-08-23
 * Update - Upgrade Menu Added
 

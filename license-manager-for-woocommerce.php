@@ -1,16 +1,16 @@
 <?php
 /**
- * Plugin Name: License Manager for WooCommerce (Free)
+ * Plugin Name: License Manager for WooCommerce
  * Plugin URI: https://www.wpexperts.io/
  * Description: Easily sell and manage software license keys through your WooCommerce shop.
- * Version: 2.2.9
+ * Version: 2.2.10
  * Author: LicenseManager
  * Author URI: https://www.licensemanager.at/
  * Requires at least: 4.7
  * Tested up to: 6.2.2
  * Requires PHP: 7.0
  * WC requires at least: 2.7
- * WC tested up to: 7.8.0
+ * WC tested up to: 7.9.0
  */
 
 namespace LicenseManagerForWooCommerce;
@@ -36,7 +36,7 @@ if (!defined('LMFWC_PLUGIN_URL')) {
 
 // Define LMFWC_VERSION.
 if (!defined('LMFWC_VERSION')) {
-    define('LMFWC_VERSION', '2.2.9');
+    define('LMFWC_VERSION', '2.2.10');
 }
 
 /**

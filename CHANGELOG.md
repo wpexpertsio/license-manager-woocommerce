@@ -1,6 +1,9 @@
-##### 2.2.9 - 2022-06-28
+##### 2.2.10 - 2023-08-01
+*Fix - The reported vulnerability has been resolved by updating the Feedback SDK to the latest version.
+
+##### 2.2.9 - 2023-06-28
 * Tested up to WooCommerce v7.8.0 and WordPress v6.2.2
-* 
+
 ##### 2.2.8 - 2022-08-23
 * Update - Upgrade Menu Added
 

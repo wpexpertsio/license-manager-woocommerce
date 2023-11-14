@@ -13,7 +13,11 @@ use LicenseManagerForWooCommerce\Interfaces\IntegrationController as Integration
 use LicenseManagerForWooCommerce\Models\Resources\Generator as GeneratorResourceModel;
 use LicenseManagerForWooCommerce\Models\Resources\License as LicenseResourceModel;
 use LicenseManagerForWooCommerce\Repositories\Resources\License as LicenseResourceRepository;
+use LicenseManagerForWooCommerce\Integrations\WooCommerce\Stock;
 use LicenseManagerForWooCommerce\Settings;
+use LicenseManagerForWooCommerce\Setup;
+use LicenseManagerForWooCommerce\Repositories\Resources\LicenseActivations as ActivationResourceRepository;
+use LicenseManagerForWooCommerce\Repositories\Resources\Generator as GeneratorResourceRepository;
 use stdClass;
 use WC_Order;
 use WC_Order_Item_Product;
@@ -36,6 +40,7 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
 
         add_filter('lmfwc_get_customer_license_keys',     array($this, 'getCustomerLicenseKeys'),     10, 1);
         add_filter('lmfwc_get_all_customer_license_keys', array($this, 'getAllCustomerLicenseKeys'),  10, 1);
+        add_filter('lmfwc_get_license_activations',       array($this, 'getLicenseActivations'),  10, 1);
         add_filter('lmfwc_insert_generated_license_keys', array($this, 'insertGeneratedLicenseKeys'), 10, 5);
         add_filter('lmfwc_insert_imported_license_keys',  array($this, 'insertImportedLicenseKeys'),  10, 7);
         add_action('lmfwc_sell_imported_license_keys',    array($this, 'sellImportedLicenseKeys'),    10, 3);
@@ -52,10 +57,13 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
         new Email();
         new ProductData();
 
-        if (Settings::get('lmfwc_enable_my_account_endpoint')) {
+        if ( Settings::get('lmfwc_enable_my_account_endpoint' , Settings::SECTION_WOOCOMMERCE)) {
             new MyAccount();
         }
     }
+
+
+
 
     /**
      * Retrieves ordered license keys.
@@ -75,7 +83,7 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
             $product = $item_data->get_product();
 
             // Check if the product has been activated for selling.
-            if (!get_post_meta($product->get_id(), 'lmfwc_licensed_product', true)) {
+            if (!$product->get_meta( 'lmfwc_licensed_product', true)) {
                 continue;
             }
 
@@ -92,6 +100,16 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
         }
 
         return $data;
+    }
+
+    public function getLicenseActivations($license_id) {
+        
+        $activations = ActivationResourceRepository::instance()->findAllBy(
+            array(
+                'license_id' => $license_id
+            )
+        );
+        return $activations;
     }
 
     /**
@@ -188,7 +206,7 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
         }
 
         /** @var WC_Order $order */
-        if ($order = wc_get_order($orderId)) {
+        if ($order = wc_get_order($cleanOrderId)) {
             $userId = $order->get_user_id();
         }
 
@@ -230,7 +248,7 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
                 )
             );
         }
-
+         
         // There have been duplicate keys, regenerate and add them.
         if ($invalidKeysAmount > 0) {
             $newKeys = apply_filters('lmfwc_generate_license_keys', $invalidKeysAmount, $generator);
@@ -245,8 +263,12 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
         }
 
         else {
-            // Keys have been generated and saved, this order is now complete.
-            update_post_meta($cleanOrderId, 'lmfwc_order_complete', 1);
+           if ( $cleanOrderId ) {
+                $order = wc_get_order($cleanOrderId);
+                $order->update_meta_data('lmfwc_order_complete', 1);
+                $order->save();
+           }
+          
         }
     }
 
@@ -392,7 +414,9 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
      */
     public function dropdownDataSearch()
     {
+        
         check_ajax_referer('lmfwc_dropdown_search', 'security');
+
 
         $type    = (string)wc_clean(wp_unslash($_POST['type']));
         $page    = 1;
@@ -459,6 +483,8 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
                 }
             }
 
+             
+
             // Search for a specific user
             elseif ($type === 'user') {
                 $users = new WP_User_Query(
@@ -519,6 +545,24 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
                     );
                 }
             }
+             elseif( 'generator' === $type ) {
+                $generators = $this->searchGenerators( $term, $limit, $offset );
+                if ( count( $generators ) < $limit ) {
+                    $more = false;
+                }
+
+                foreach ( $generators as $generator ) {
+                    $text      = sprintf(
+                        '#%d - %s',
+                        $generator['id'],
+                        $generator['name']
+                    );
+                    $results[] = array(
+                        'id'   => $generator['id'],
+                        'text' => $text
+                    );
+                }
+            } // Search for users
 
             // Search for products
             elseif ($type === 'product') {
@@ -549,7 +593,7 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
                     );
                 }
             }
-
+           
             // Search for users
             elseif ($type === 'user') {
                 $users = new WP_User_Query(
@@ -617,5 +661,35 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
         ";
 
         return $wpdb->get_col($sql);
+    }
+
+    private function searchGenerators($term, $limit, $offset) {
+    global $wpdb;
+    $tableGenerators = $wpdb->prefix . Setup::GENERATORS_TABLE_NAME;
+
+    $query = $wpdb->prepare(
+        "SELECT generators.id, generators.name
+        FROM $tableGenerators AS generators
+        WHERE 1=1 AND (generators.name LIKE %s OR generators.id=%d)
+        ORDER BY generators.id DESC
+        LIMIT %d OFFSET %d",
+        "%" . $wpdb->esc_like( $term ) . "%",
+        intval($term),
+        $limit,
+        $offset
+    );
+
+    return $wpdb->get_results( $query, ARRAY_A );
+}
+
+        /**
+     * Return license url
+     *
+     * @param $license
+     *
+     * @return string|null
+     */
+    public static function getAccountLicenseUrl( $license_id ) {
+        return esc_url( wc_get_account_endpoint_url( 'view-license-keys/' . $license_id ) );
     }
 }

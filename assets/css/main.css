@@ -246,7 +246,97 @@ table.wp-list-table.lizenzschlssel span.lmfwc-date {
 /** Licenses page dropdown width fix **/
 .wrap.lmfwc #filter-by-order-id + .select2-container,
 .wrap.lmfwc #filter-by-user-id + .select2-container,
+.wrap.lmfwc #filter-by-license-id + .select2-container,
+.wrap.lmfwc #filter-by-source + .select2-container,
 .wrap.lmfwc #filter-by-product-id + .select2-container {
 	width: auto !important;
 	max-width: 10rem;
+}
+
+.lmfwc-status-delivered {
+    border-color: var(--color-success);
+    color: var(--color-success);
+}
+
+.lmfwc-status-delivered > span.dashicons {
+    color: var(--color-success);
+}
+
+lmfwc-status-active {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.lmfwc-status-active > span.dashicons {
+    color: var(--color-primary);
+}
+
+.lmfwc-status-inactive {
+    border-color: var(--color-inactive);
+    color: var(--color-inactive);
+}
+
+.lmfwc-status-inactive > span.dashicons {
+    color: #8f8f8f;
+}
+.lmfwc-field-placeholder {
+    width: 100px;
+    height: auto !important;
+}
+
+
+.lmfwc-tool-form-row {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.lmfwc-tool-form-row label span, .lmfwc-tool-form-row label small {
+    font-weight: normal;
+}
+
+.lmfwc-tool-form-row label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.lmfwc-tool-progress-info, .lmfwc-tool-progress-bar, .lmfwc-tool-form-row #identifier {
+    max-width: 400px;
+    width: 100%;
+}
+
+.lmfwc-tool-progress-bar {
+    position: relative;
+    height: 20px;
+    border: 1px solid #cccccc;
+}
+
+.lmfwc-tool-progress-bar-inner {
+    position: absolute;
+    left: 0;
+    top: 0;
+    margin-top: 0px !important;
+    background-color: #73d95b;
+    height: 100%;
+    font-size: 0px;
+    transition: width 600ms linear;
+}
+
+.lmfwc-tool-progress-info {
+    text-align: center;
+    font-size: 12px;
+}
+
+.lmfwc-tool-row > .lmfwc-tool-form .lmfwc-tool-form-row:last-child {
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+.lmfwc-tool-row > h3, .lmfwc-tool-row > p, .lmfwc-tool-row > .lmfwc-tool-form {
+    padding-left: 20px;
+    padding-right: 20px;
+}
+.lmfwc-tool-row {
+    border: 1px solid #ccc;
+    margin-bottom: 17px;
 }

@@ -9,6 +9,8 @@ use LicenseManagerForWooCommerce\Enums\LicenseSource;
 use LicenseManagerForWooCommerce\Enums\LicenseStatus as LicenseStatusEnum;
 use LicenseManagerForWooCommerce\Models\Resources\License as LicenseResourceModel;
 use LicenseManagerForWooCommerce\Repositories\Resources\License as LicenseResourceRepository;
+use LicenseManagerForWooCommerce\Repositories\Resources\LicenseActivations as ActivationResourceRepository;
+use LicenseManagerForWooCommerce\Enums\ActivationSource ;
 
 defined('ABSPATH') || exit;
 
@@ -44,7 +46,7 @@ function lmfwc_add_license($licenseKey, $licenseData = array())
     }
 
     if (array_key_exists('user_id', $licenseData)) {
-        $productId = $licenseData['user_id'];
+        $userId = $licenseData['user_id'];
     }
 
     if (array_key_exists('expires_at', $licenseData)) {
@@ -61,7 +63,7 @@ function lmfwc_add_license($licenseKey, $licenseData = array())
 
     if (!in_array($status, LicenseStatusEnum::$status)) {
         throw new Exception('\'status\' array key not valid. Possible values are: 1 for SOLD, 2 for DELIVERED,
-        3 for ACTIVE, and 4 for INACTIVE.');
+            3 for ACTIVE, and 4 for INACTIVE.');
     }
 
     if (apply_filters('lmfwc_duplicate', $licenseKey)) {
@@ -78,6 +80,7 @@ function lmfwc_add_license($licenseKey, $licenseData = array())
     $queryData = array(
         'order_id'            => $orderId,
         'product_id'          => $productId,
+        'user_id'             => $userId,
         'license_key'         => $encryptedLicenseKey,
         'hash'                => $hashedLicenseKey,
         'expires_at'          => $expiresAt,
@@ -227,7 +230,7 @@ function lmfwc_update_license($licenseKey, $licenseData)
     if (array_key_exists('status', $licenseData)) {
         if (!in_array(intval($licenseData['status']), LicenseStatusEnum::$status)) {
             throw new Exception('The \'status\' array key not valid. Possible values are: 1 for SOLD, 2 for
-            DELIVERED, 3 for ACTIVE, and 4 for INACTIVE.');
+                DELIVERED, 3 for ACTIVE, and 4 for INACTIVE.');
         }
 
         $updateData['status'] = intval($licenseData['status']);
@@ -340,16 +343,50 @@ function lmfwc_delete_license($licenseKey)
  * @return bool|LicenseResourceModel
  * @throws Exception
  */
-function lmfwc_activate_license($licenseKey)
+function lmfwc_activate_license($licenseKey, $args)
 {
-    $license = LicenseResourceRepository::instance()->findBy(
-        array(
-            'hash' => apply_filters('lmfwc_hash', $licenseKey)
-        )
-    );
+
+   try {
+        /** @var LicenseResourceModel $license */
+        $license = LicenseResourceRepository::instance()->findBy(
+            array(
+                'hash' => apply_filters('lmfwc_hash', $licenseKey)
+            )
+        );
+    } catch (Exception $e) {
+        return new WP_Error(
+            'lmfwc_rest_data_error',
+            $e->getMessage(),
+            array('status' => 404)
+        );
+    }
 
     if (!$license) {
-        return false;
+        return new WP_Error(
+            'lmfwc_rest_data_error',
+            sprintf(
+                'License Key: %s could not be found.',
+                $licenseKey
+            ),
+            array('status' => 404)
+        );
+    }
+
+    if ($expiresAt = $license->getExpiresAt()) {
+        try {
+            $dateExpiresAt = new DateTime($expiresAt);
+            $dateNow = new DateTime('now', new DateTimeZone('UTC'));
+        } catch (Exception $e) {
+            return new WP_Error('lmfwc_rest_license_expired', $e->getMessage());
+        }
+
+        if ($dateNow > $dateExpiresAt) {
+            return new WP_Error(
+                'lmfwc_rest_license_expired',
+                sprintf('The license Key expired on %s (UTC).', $license->getExpiresAt()),
+                array('status' => 404)
+            );
+        }
     }
 
     $timesActivated    = null;
@@ -364,73 +401,462 @@ function lmfwc_activate_license($licenseKey)
     }
 
     if ($timesActivatedMax && ($timesActivated >= $timesActivatedMax)) {
-        throw new Exception("License Key: {$licenseKey} reached maximum activation count.");
+        return new WP_Error(
+            'lmfwc_rest_data_error',
+            sprintf(
+                'License Key: %s reached maximum activation count.',
+                $licenseKey
+            ),
+            array('status' => 404)
+        );
     }
 
-    if (!$timesActivated) {
-        $timesActivatedNew = 1;
-    } else {
-        $timesActivatedNew = intval($timesActivated) + 1;
+    if ( isset($args['token']) && !empty($args['token']) ) {
+        $licenseData = lmfwc_reactivate_license($args['token']);
+        if ( is_wp_error($licenseData) ) {
+            return $licenseData;
+        }
+        return $licenseData;
+    }
+    try {
+        if (!$timesActivated) {
+            $timesActivatedNew = 1;
+        }
+
+        else {
+            $timesActivatedNew = intval($timesActivated) + 1;
+        }
+        
+        $newToken = lmfwc_generateToken( $licenseKey );
+        if ( is_null( $newToken ) ) {
+            return new WP_Error( 'data_error', sprintf( 'Unable to generate activation token hash for license: %s', $licenseKey ), array( 'status' => 404 ) );
+        }
+
+        /* @var LicenseActivation $licenseActivation */
+        $activationParams = array(
+            'license_id' => $license->getId(),
+            'token'      => $newToken,
+            'source'     => isset($args['source']) ? $args['source'] : ActivationSource::API,
+            'ip_address' => lmfwc_clientIp(),
+            'user_agent' => lmfwc_userAgent()
+        );
+
+                // Set label
+        if (isset($args['label']) && ! empty( $args['label'] ) ) {
+            $activationParams['label'] = $args['label'];
+        }
+
+                // Set metadata
+        if (isset($args['meta_data']) && is_array( $args['meta_data'] ) ) {
+            $activationParams['meta_data'] = $args['meta_data'];
+        }
+
+                // Store.
+        $licenseActivation = ActivationResourceRepository::instance()->insert( $activationParams );
+
+        if ( ! $licenseActivation ) {
+            return new WP_Error( 'server_error', __( 'Unable to activate key', 'license-manager-for-woocommerce' ), array( 'status' => 500 ) );
+        }
+        /** @var LicenseResourceModel $updatedLicense */
+        $updatedLicense = LicenseResourceRepository::instance()->update(
+            $license->getId(),
+            array(
+                'times_activated' => $timesActivatedNew
+            )
+        );
+    } catch (Exception $e) {
+        return new WP_Error(
+            'lmfwc_rest_data_error',
+            $e->getMessage(),
+            array('status' => 404)
+        );
     }
 
-    /** @var LicenseResourceModel $updatedLicense */
-    $updatedLicense = LicenseResourceRepository::instance()->update(
-        $license->getId(),
-        array(
-            'times_activated' => $timesActivatedNew
-        )
-    );
-
-    if (!$updatedLicense) {
-        return false;
+    $licenseData = $updatedLicense->toArray();
+    $licenseData['activationData'] = $licenseActivation->toArray();
+            // Remove the hash and decrypt the license key
+    unset($licenseData['hash']);
+    $licenseData['licenseKey'] = $updatedLicense->getDecryptedLicenseKey();
+    return $licenseData;
     }
 
-    return $updatedLicense;
+    /**
+     * Decrements the "times_activated" column, if possible.
+     *
+     * @param string $licenseKey The license key to be deactivated.
+     *
+     * @return bool|LicenseResourceModel
+     * @throws Exception
+     */
+     function lmfwc_deactivate_license($licenseKey, $args)
+    {
+        if ( isset($args['token']) && !empty($args['token']) ) :
+            try {
+                /** @var LicenseResourceModel $license */
+                $activation = ActivationResourceRepository::instance()->findBy(
+                    array(
+                        'token' => $args['token'],
+                        'deactivated_at' => null
+                    )
+                );
+
+            
+            } catch (Exception $e) {
+                return new WP_Error(
+                    'lmfwc_rest_data_error',
+                    $e->getMessage(),
+                    array('status' => 404)
+                );
+            }
+
+            if ( ! $activation ) {
+                return new WP_Error(
+                    'lmfwc_rest_data_error',
+                    sprintf(
+                        'Activation Token: %s could not be found or is deactivated.',
+                        $args['token']
+                    ),
+                    array('status' => 404)
+                );
+            }
+
+            $license = $activation->getLicense();
+            $timesActivated = null;
+
+            if ($license->getTimesActivated() !== null) {
+                $timesActivated = absint($license->getTimesActivated());
+            }
+
+            if (!$timesActivated || $timesActivated == 0) {
+                return new WP_Error(
+                    'lmfwc_rest_data_error',
+                    sprintf(
+                        'License Key: %s has not been activated yet.',
+                        $licenseKey
+                    ),
+                    array('status' => 404)
+                );
+            }
+
+            try {
+                $timesActivatedNew = intval($timesActivated) - 1;
+
+                /** @var LicenseResourceModel $updatedLicense */
+                $updatedActivation = ActivationResourceRepository::instance()->update(
+                    $activation->getId(),
+                    array(
+                        'deactivated_at' =>  gmdate( 'Y-m-d H:i:s' )
+                    )
+                );
+                $updatedLicense = LicenseResourceRepository::instance()->update(
+                    $license->getId(),
+                    array(
+                        'times_activated' => $timesActivatedNew
+                    )
+                );
+            } catch (Exception $e) {
+                return new WP_Error(
+                    'lmfwc_rest_data_error',
+                    $e->getMessage(),
+                    array('status' => 404)
+                );
+            }
+
+            $licenseData = $updatedLicense->toArray();
+            $licenseData['activationData'] = $updatedActivation->toArray();
+            // Remove the hash and decrypt the license key
+            unset($licenseData['hash']);
+            $licenseData['licenseKey'] = $updatedLicense->getDecryptedLicenseKey();
+        elseif ( isset($licenseKey) && !empty($licenseKey) ) :
+            try {
+                /** @var LicenseResourceModel $license */
+                $license = LicenseResourceRepository::instance()->findBy(
+                    array(
+                        'hash' => apply_filters('lmfwc_hash', $licenseKey)
+                    )
+                );
+
+            
+            } catch (Exception $e) {
+                return new WP_Error(
+                    'lmfwc_rest_data_error',
+                    $e->getMessage(),
+                    array('status' => 404)
+                );
+            }
+
+            if ( ! $license ) {
+                return new WP_Error(
+                    'lmfwc_rest_data_error',
+                    sprintf(
+                        'License Key: %s could not be found or is deactivated.',
+                        $licenseKey
+                    ),
+                    array('status' => 404)
+                );
+            }
+
+            $timesActivated = null;
+
+            if ($license->getTimesActivated() !== null) {
+                $timesActivated = absint($license->getTimesActivated());
+            }
+
+            if (!$timesActivated || $timesActivated == 0) {
+                return new WP_Error(
+                    'lmfwc_rest_data_error',
+                    sprintf(
+                        'License Key: %s has not been activated yet.',
+                        $licenseKey
+                    ),
+                    array('status' => 404)
+                );
+            }
+
+            // Deactivate the license key
+            try {
+                $timesActivatedNew = 0;
+                $activations = ActivationResourceRepository::instance()->findAllBy(
+                    array(
+                        'license_id' => $license->getId()
+                    )
+                );
+                   
+                foreach ( $activations as $activation ) {
+
+                    /** @var LicenseResourceModel $updatedLicense */
+                    $updatedActivation = ActivationResourceRepository::instance()->update(
+                        $activation->getId(),
+                        array(
+                            'deactivated_at' =>  gmdate( 'Y-m-d H:i:s' )
+                        )
+                    );
+                    
+                    $updatedActivations[] = $updatedActivation->toArray();
+                }
+                $updatedLicense = LicenseResourceRepository::instance()->update(
+                    $license->getId(),
+                    array(
+                        'times_activated' => $timesActivatedNew
+                    )
+                );
+            } catch (Exception $e) {
+                return new WP_Error(
+                    'lmfwc_rest_data_error',
+                    $e->getMessage(),
+                    array('status' => 404)
+                );
+            }
+
+            $licenseData = $updatedLicense->toArray();
+            $licenseData['activationData'] = $updatedActivations;
+            // Remove the hash and decrypt the license key
+            unset($licenseData['hash']);
+            $licenseData['licenseKey'] = $updatedLicense->getDecryptedLicenseKey();
+        endif;
+        return $licenseData;
+    }
+
+
+    function lmfwc_delete_activation($activation_id, $license_id)
+    {
+
+        $deleteActivation = ActivationResourceRepository::instance()->deleteBy(
+            array(
+                'id' => $activation_id
+            )
+        );
+
+        $count = ActivationResourceRepository::instance()->countBy( 
+            array(
+                'license_id' => $license_id,
+                'deactivated_at' => null
+            )
+        );
+        $updatedLicense = LicenseResourceRepository::instance()->update(
+            $license_id,
+            array(
+                'times_activated' => $count
+            )
+        );
+        return $updatedLicense;
+    }
+
+ /**
+     * Decrements the "times_activated" column, if possible.
+     *
+     * @param string $licenseKey The license key to be deactivated.
+     *
+     * @return bool|LicenseResourceModel
+     * @throws Exception
+     */
+ function lmfwc_reactivate_license($activation_token)
+ {
+
+    try {
+            /** @var LicenseResourceModel $license */
+            $activation = ActivationResourceRepository::instance()->findBy(
+                array(
+                    'token' => $activation_token
+                )
+            );
+
+        
+        } catch (Exception $e) {
+            return new WP_Error(
+                'lmfwc_rest_data_error',
+                $e->getMessage(),
+                array('status' => 404)
+            );
+        }
+        $license = $activation->getLicense();
+
+         if ($expiresAt = $license->getExpiresAt()) {
+        try {
+            $dateExpiresAt = new DateTime($expiresAt);
+            $dateNow = new DateTime('now', new DateTimeZone('UTC'));
+        } catch (Exception $e) {
+            return new WP_Error('lmfwc_rest_license_expired', $e->getMessage());
+        }
+
+            if ($dateNow > $dateExpiresAt) {
+                
+                return new WP_Error(
+                    'lmfwc_rest_license_expired',
+                    sprintf('The license Key expired on %s (UTC).', $license->getExpiresAt()),
+                    array('status' => 404)
+                );
+            }
+         }
+
+
+
+        if ( ! $activation ) {
+            return new WP_Error(
+                'lmfwc_rest_data_error',
+                sprintf(
+                    'Activation Token: %s could not be found.',
+                    $activation_token
+                ),
+                array('status' => 404)
+            );
+        }
+     
+        if ( ! $activation->getDeactivatedAt() ) {
+            
+            return new WP_Error(
+                'lmfwc_rest_data_error',
+                sprintf(
+                    'Activation Token: %s is already activated.',
+                    $activation_token
+                ),
+                array('status' => 404)
+            );
+        }
+
+       
+        $license = $activation->getLicense();
+        $timesActivated = null;
+
+        // if ($license->getTimesActivated() !== null) {
+        //     $timesActivated = absint($license->getTimesActivated());
+        // }
+
+        // if (!$timesActivated || $timesActivated == 0) {
+        //     return new WP_Error(
+        //         'lmfwc_rest_data_error',
+        //         sprintf(
+        //             'License Key: %s has not been activated yet.',
+        //             $licenseKey
+        //         ),
+        //         array('status' => 404)
+        //     );
+        // }
+
+        // Deactivate the license key
+        try {
+            $timesActivatedNew = intval($timesActivated) + 1;
+
+            /** @var LicenseResourceModel $updatedLicense */
+            $updatedActivation = ActivationResourceRepository::instance()->update(
+                $activation->getId(),
+                array(
+                    'deactivated_at' =>  null
+                )
+            );
+            $updatedLicense = LicenseResourceRepository::instance()->update(
+                $license->getId(),
+                array(
+                    'times_activated' => $timesActivatedNew
+                )
+            );
+        } catch (Exception $e) {
+            return new WP_Error(
+                'lmfwc_rest_data_error',
+                $e->getMessage(),
+                array('status' => 404)
+            );
+        }
+
+        $licenseData = $updatedLicense->toArray();
+        $licenseData['activationData'] = $updatedActivation->toArray();
+        // Remove the hash and decrypt the license key
+        unset($licenseData['hash']);
+        $licenseData['licenseKey'] = $updatedLicense->getDecryptedLicenseKey();
+        return $licenseData;
 }
 
-/**
- * Decrements the "times_activated" column, if possible.
- *
- * @param string $licenseKey The license key to be deactivated.
- *
- * @return bool|LicenseResourceModel
- * @throws Exception
- */
-function lmfwc_deactivate_license($licenseKey)
-{
-    $license = LicenseResourceRepository::instance()->findBy(
-        array(
-            'hash' => apply_filters('lmfwc_hash', $licenseKey)
-        )
-    );
 
-    if (!$license) {
-        return false;
+    /**
+     * Generates activation token
+     *
+     * @param $licenseKey
+     *
+     * @return string|null
+     */
+    function lmfwc_generateToken( $licenseKey ) {
+        $token    = apply_filters('lmfwc_activation_hash',  $licenseKey );
+        $reps     = 0;
+        $max_reps = 20;
+        while ( true ) {
+            if ( (int) ActivationResourceRepository::instance()->countBy( [ 'token' => $token ] ) === 0 ) {
+                break;
+            } else if ( $reps > $max_reps ) {
+                $token = null; // Do not enter in infinite loop.
+                break;
+            } else {
+                $token = apply_filters('lmfwc_activation_hash',  $licenseKey );
+            }
+            $reps ++;
+        }
+
+        return $token;
     }
 
-    $timesActivated = null;
+    function lmfwc_clientIp() {
 
-    if ($license->getTimesActivated() !== null) {
-        $timesActivated = absint($license->getTimesActivated());
+        $addr = null;
+        if ( getenv( 'HTTP_CLIENT_IP' ) ) {
+            $addr = getenv( 'HTTP_CLIENT_IP' );
+        } else if ( getenv( 'HTTP_X_FORWARDED_FOR' ) ) {
+            $addr = getenv( 'HTTP_X_FORWARDED_FOR' );
+        } else if ( getenv( 'HTTP_X_FORWARDED' ) ) {
+            $addr = getenv( 'HTTP_X_FORWARDED' );
+        } else if ( getenv( 'HTTP_FORWARDED_FOR' ) ) {
+            $addr = getenv( 'HTTP_FORWARDED_FOR' );
+        } else if ( getenv( 'HTTP_FORWARDED' ) ) {
+            $addr = getenv( 'HTTP_FORWARDED' );
+        } else if ( getenv( 'REMOTE_ADDR' ) ) {
+            $addr = getenv( 'REMOTE_ADDR' );
+        }
+
+        return $addr;
+
     }
 
-    if (!$timesActivated || $timesActivated === 0) {
-        throw new Exception("License Key: {$licenseKey} has not been activated yet.");
+    /**
+     * Return the client user agent
+     */
+    function lmfwc_userAgent() {
+        return isset( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_text_field($_SERVER['HTTP_USER_AGENT']) : null;
     }
-
-    $timesActivatedNew = intval($timesActivated) - 1;
-
-    /** @var LicenseResourceModel $updatedLicense */
-    $updatedLicense = LicenseResourceRepository::instance()->update(
-        $license->getId(),
-        array(
-            'times_activated' => $timesActivatedNew
-        )
-    );
-
-    if (!$updatedLicense) {
-        return false;
-    }
-
-    return $updatedLicense;
-}

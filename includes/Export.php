@@ -2,10 +2,11 @@
 
 namespace LicenseManagerForWooCommerce;
 
-use FPDF;
+use Dompdf\Dompdf;
 use LicenseManagerForWooCommerce\Enums\LicenseStatus;
 use LicenseManagerForWooCommerce\Models\Resources\License as LicenseResourceModel;
 use LicenseManagerForWooCommerce\Repositories\Resources\License as LicenseResourceRepository;
+use LicenseManagerForWooCommerce\Settings;
 
 defined('ABSPATH') || exit;
 
@@ -18,7 +19,9 @@ class Export
     {
         add_action('lmfwc_export_license_keys_pdf', array($this, 'exportLicenseKeysPdf'), 10, 1);
         add_action('lmfwc_export_license_keys_csv', array($this, 'exportLicenseKeysCsv'), 10, 1);
+     
     }
+
 
     /**
      * Creates a PDF of license keys by the given array of ID's.
@@ -26,7 +29,10 @@ class Export
      * @param array $licenseKeyIds
      */
     public function exportLicenseKeysPdf($licenseKeyIds)
-    {
+    {   
+        $get_logo = Settings::get( 'lmfwc_company_logo', Settings::SECTION_WOOCOMMERCE );
+        $logo = is_numeric( $get_logo ) ? wp_get_attachment_image_url( $get_logo, 'full' ) : null;
+       
         $licenseKeys = array();
 
         foreach ($licenseKeyIds as $licenseKeyId) {
@@ -52,72 +58,36 @@ class Export
             'license_key' => __('License key', 'license-manager-for-woocommerce')
         );
 
+        $pdf = new DOMPDF();
         ob_clean();
+        ob_start();
 
-        $pdf = new FPDF('P', 'mm', 'A4');
-        $pdf->AddPage();
-        $pdf->AddFont('Roboto-Bold', '', 'Roboto-Bold.php');
-        $pdf->AddFont('Roboto-Regular', '', 'Roboto-Regular.php');
-        $pdf->AddFont('RobotoMono-Regular', '', 'RobotoMono-Regular.php');
-        $pdf->SetFont('Roboto-Bold', '', 10);
-
-        // Header
-        $pdf->Image(LMFWC_IMG_URL . 'lmfwc_logo.jpg', 10, 10, -300);
-        $pdf->Ln(25);
-
-        // Table Header
-        $pdf->SetDrawColor(200, 200, 200);
-
+        echo '<table>';
+        echo '<thead>';
+        echo '<img src="' . $logo . '" alt="Logo" style="width: 100px;">';
+        echo '<tr>';
+        
         foreach ($header as $columnName => $col) {
-            $width = 40;
-
-            if ($columnName == 'id') {
-                $width = 12;
-            }
-
-            if ($columnName == 'order_id'
-                || $columnName == 'product_id'
-            ) {
-                $width = 20;
-            }
-
-            if ($columnName == 'license_key') {
-                $width = 0;
-            }
-
-            $pdf->Cell($width, 10, $col, 'B');
+            echo '<th>' .$col.'</th>';
         }
-
+        echo '</tr></thead><tbody>';
         // Data
-        $pdf->Ln();
 
         foreach ($licenseKeys as $row) {
+            echo '<tr>';
             foreach ($row as $columnName => $col) {
-                $pdf->SetFont('Roboto-Regular', '', 8);
-                $width = 40;
-
-                if ($columnName == 'id') {
-                    $width = 12;
-                }
-
-                if ($columnName == 'order_id'
-                    || $columnName == 'product_id'
-                ) {
-                    $width = 20;
-                }
-
-                if ($columnName == 'license_key') {
-                    $pdf->SetFont('RobotoMono-Regular', '', 8);
-                    $width = 0;
-                }
-
-                $pdf->Cell($width, 6, $col, 'B');
+                echo '<td>'.$col.'</td>';
             }
-
-            $pdf->Ln();
+            echo '</tr>';
         }
-
-        $pdf->Output(date('YmdHis') . '_license_keys_export.pdf', 'D');
+        echo '</tr></tbody></table>';
+        $html = ob_get_clean();
+        $pdf->set_option('enable_html5_parser', true);
+        $pdf->set_option('isRemoteEnabled', true);
+        $pdf->loadHtml($html, 'UTF-8');
+        $pdf->setPaper('A4', 'landscape');
+        $pdf->render();
+        $pdf->stream(date('YmdHis') . '_license_keys_export.pdf', array('attachment'=>true));
     }
 
     /**

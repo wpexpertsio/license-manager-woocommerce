@@ -11,6 +11,10 @@ class ColumnType
      */
     const INT = 'INT';
 
+     /**
+     * @var string
+     */
+    const TEXT = 'TEXT';
     /**
      * @var string
      */
@@ -40,4 +44,6 @@ class ColumnType
      * @var string
      */
     CONST DATETIME = 'DATETIME';
+
+    CONST SERIALIZED = 'SERIALIZED';
 }

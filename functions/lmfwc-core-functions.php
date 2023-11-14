@@ -6,6 +6,7 @@
  */
 
 use LicenseManagerForWooCommerce\Repositories\Resources\License as LicenseResourceRepository;
+use LicenseManagerForWooCommerce\Settings;
 
 defined('ABSPATH') || exit;
 
@@ -89,4 +90,29 @@ function lmfwc_rand_hash()
 function lmfwc_camelize($input, $separator = '_')
 {
     return str_replace($separator, '', ucwords($input, $separator));
+}
+
+/**
+ * Returns a format string for expiration dates.
+ *
+ * @return string
+ */
+function lmfwc_expiration_format() {
+
+    $expiration_format = Settings::get( 'lmfwc_expire_format', Settings::SECTION_GENERAL );
+    if ( false === $expiration_format ) {
+        $expiration_format = '{{DATE_FORMAT}}, {{TIME_FORMAT}} T';
+    }
+
+    if ( strpos( $expiration_format, '{{DATE_FORMAT}}' ) !== false ) {
+        $date_format       = get_option( 'date_format', 'F j, Y' );
+        $expiration_format = str_replace( '{{DATE_FORMAT}}', $date_format, $expiration_format );
+    }
+
+    if ( strpos( $expiration_format, '{{TIME_FORMAT}}' ) !== false ) {
+        $time_format       = get_option( 'time_format', 'g:i a' );
+        $expiration_format = str_replace( '{{TIME_FORMAT}}', $time_format, $expiration_format );
+    }
+
+    return $expiration_format;
 }

@@ -2,27 +2,26 @@
     "autoload": {
         "psr-4": {
             "LicenseManagerForWooCommerce\\": "includes/",
-            "LicenseManagerForWooCommerce\\Abstracts\\": "includes/abstracts",
-            "LicenseManagerForWooCommerce\\API\\": "includes/api",
-            "LicenseManagerForWooCommerce\\API\\v1\\": "includes/api/v1",
-            "LicenseManagerForWooCommerce\\API\\v2\\": "includes/api/v2",
-            "LicenseManagerForWooCommerce\\Controllers\\": "includes/controllers",
-            "LicenseManagerForWooCommerce\\Enums\\": "includes/enums",
-            "LicenseManagerForWooCommerce\\Integrations\\": "includes/integrations",
-            "LicenseManagerForWooCommerce\\Integrations\\WooCommerce\\": "includes/integrations/woocommerce",
-            "LicenseManagerForWooCommerce\\Integrations\\WooCommerce\\Emails\\": "includes/integrations/woocommerce/emails",
-            "LicenseManagerForWooCommerce\\Interfaces\\": "includes/interfaces",
-            "LicenseManagerForWooCommerce\\Lists\\": "includes/lists",
-            "LicenseManagerForWooCommerce\\Models\\": "includes/models",
-            "LicenseManagerForWooCommerce\\Models\\Resources\\": "includes/models/resources",
-            "LicenseManagerForWooCommerce\\Repositories\\": "includes/repositories",
-            "LicenseManagerForWooCommerce\\Repositories\\Resources\\": "includes/repositories/resources",
-            "LicenseManagerForWooCommerce\\Settings\\": "includes/settings"
+            "LicenseManagerForWooCommerce\\Abstracts\\": "includes/Abstracts/",
+            "LicenseManagerForWooCommerce\\Api\\": "includes/Api/",
+            "LicenseManagerForWooCommerce\\Api\\v2\\": "includes/Api/V2/",
+            "LicenseManagerForWooCommerce\\Controllers\\": "includes/Controllers/",
+            "LicenseManagerForWooCommerce\\Enums\\": "includes/Enums/",
+            "LicenseManagerForWooCommerce\\Integrations\\": "includes/Integrations/",
+            "LicenseManagerForWooCommerce\\Integrations\\WooCommerce\\": "includes/Integrations/WooCommerce/",
+            "LicenseManagerForWooCommerce\\Integrations\\WooCommerce\\Emails\\": "includes/Integrations/WooCommerce/Emails/",
+            "LicenseManagerForWooCommerce\\Interfaces\\": "includes/Interfaces/",
+            "LicenseManagerForWooCommerce\\Lists\\": "includes/Lists/",
+            "LicenseManagerForWooCommerce\\Models\\": "includes/Models/",
+            "LicenseManagerForWooCommerce\\Models\\Resources\\": "includes/Models/Resources/",
+            "LicenseManagerForWooCommerce\\Repositories\\": "includes/Repositories/",
+            "LicenseManagerForWooCommerce\\Repositories\\Resources\\": "includes/Repositories/Resources/",
+            "LicenseManagerForWooCommerce\\Settings\\": "includes/Settings/"
         }
     },
     "require": {
         "defuse/php-encryption": "^2.2",
-        "setasign/fpdf": "^1.8",
+        "dompdf/dompdf": "^2.0",
         "ext-openssl": "*",
         "ext-json": "*"
     },

@@ -53,8 +53,8 @@ class GeneratorsList extends WP_List_Table
         global $wpdb;
 
         $sql = "SELECT * FROM {$this->table}";
-        $sql .= ' ORDER BY ' . (empty($_REQUEST['orderby']) ? 'id'   : esc_sql($_REQUEST['orderby']));
-        $sql .= ' '          . (empty($_REQUEST['order'])   ? 'DESC' : esc_sql($_REQUEST['order']));
+          $sql .= isset($_REQUEST['orderby']) && !empty(sanitize_sql_orderby($_REQUEST['orderby'])) ?  ' ORDER BY ' . sanitize_sql_orderby($_REQUEST['orderby']) : ' ORDER BY ' . sanitize_sql_orderby('id');
+        $sql .= isset($_REQUEST['order']) && !empty(sanitize_sql_orderby($_REQUEST['order']))   ? ' ' . sanitize_sql_orderby($_REQUEST['order']) : sanitize_sql_orderby(' DESC');
         $sql .= " LIMIT {$perPage}";
         $sql .= ' OFFSET ' . ($pageNumber - 1) * $perPage;
 

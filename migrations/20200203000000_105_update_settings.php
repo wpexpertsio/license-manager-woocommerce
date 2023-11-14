@@ -12,7 +12,7 @@ use LicenseManagerForWooCommerce\Migration;
  * Upgrade
  */
 if ($migrationMode === Migration::MODE_UP) {
-    $defaultSettingsOrderStatus = array(
+    $defaultSettingsWooCommerce = array(
         'lmfwc_license_key_delivery_options' => array(
             'wc-completed' => array(
                 'send' => '1'
@@ -20,12 +20,12 @@ if ($migrationMode === Migration::MODE_UP) {
         )
     );
 
-    update_option('lmfwc_settings_order_status', $defaultSettingsOrderStatus);
+    update_option('lmfwc_settings_woocommerce', $defaultSettingsWooCommerce);
 }
 
 /**
  * Downgrade
  */
 if ($migrationMode === Migration::MODE_DOWN) {
-    delete_option('lmfwc_settings_order_status');
+    delete_option('lmfwc_settings_woocommerce');
 }

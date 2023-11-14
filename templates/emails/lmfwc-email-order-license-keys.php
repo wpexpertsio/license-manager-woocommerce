@@ -42,13 +42,13 @@ defined('ABSPATH') || exit; ?>
                         <?php if ($license->getExpiresAt()): ?>
                             <?php
                                 try {
-                                    $date = new DateTime($license->getExpiresAt());
+                                    $date = wp_date( lmfwc_expiration_format(), strtotime( $license->getExpiresAt() ) );
                                 } catch (Exception $e) {
                                 }
                             ?>
                             <td class="td" style="text-align: left; vertical-align: middle; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;">
                                 <code><?php
-                                    printf('%s <b>%s</b>', $valid_until, $date->format($date_format));
+                                printf( '%s <strong>%s</strong>', $valid_until, $date );
                                 ?></code>
                             </td>
                         <?php endif; ?>

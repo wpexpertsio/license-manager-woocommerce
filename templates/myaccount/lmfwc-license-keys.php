@@ -38,18 +38,17 @@ defined('ABSPATH') || exit; ?>
                 <?php if ($license->getExpiresAt()): ?>
                     <?php
                     try {
-                        $date = new DateTime($license->getExpiresAt());
+                        $date = wp_date( $date_format, strtotime( $license->getExpiresAt() ) );
                     } catch (Exception $e) {
                     }
                     ?>
                     <td>
-                        <span class="lmfwc-myaccount-license-key"><?php
-                            printf('%s <b>%s</b>', $valid_until, $date->format($date_format));
-                            ?></span>
+                        <span class="lmfwc-myaccount-license-key"><?php printf( '%s <strong>%s</strong>', $valid_until, $date ); ?></span>
                     </td>
                 <?php endif; ?>
             </tr>
         <?php endforeach; ?>
+      
         </tbody>
     </table>
 <?php endforeach; ?>

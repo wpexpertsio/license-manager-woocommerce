@@ -1,5 +1,19 @@
+##### 3.0 - 2023-09-15
+Tested up to WooCommerce v8.0.3 and WordPress v6.3.1
+Added - License Activations
+Added - License and Generator delete endpoints
+Added - License PDF Certificates 
+Added - Migration and Past Order License Generator tools
+Added - License Expiration Format
+Added - Single License Page in My account
+Fixed - UserId variable in lmfwc_add_license function
+Fixed - OrderBy query Vulnerability 
+
+##### 2.2.11 - 2023-09-13
+* Fix - OrderBy Queryy Vulnerability 
+
 ##### 2.2.10 - 2023-08-01
-*Fix - The reported vulnerability has been resolved by updating the Feedback SDK to the latest version.
+* Fix - The reported vulnerability has been resolved by updating the Feedback SDK to the latest version.
 
 ##### 2.2.9 - 2023-06-28
 * Tested up to WooCommerce v7.8.0 and WordPress v6.2.2

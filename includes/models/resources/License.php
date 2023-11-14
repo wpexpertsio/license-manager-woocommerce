@@ -4,7 +4,10 @@ namespace LicenseManagerForWooCommerce\Models\Resources;
 
 use LicenseManagerForWooCommerce\Abstracts\ResourceModel as AbstractResourceModel;
 use LicenseManagerForWooCommerce\Interfaces\Model as ModelInterface;
+use LicenseManagerForWooCommerce\Repositories\Resources\LicenseActivations ;
 use stdClass;
+use DateTime;
+use DateTimeZone;
 
 defined('ABSPATH') || exit;
 
@@ -199,6 +202,7 @@ class License extends AbstractResourceModel implements ModelInterface
         $this->licenseKey = $licenseKey;
     }
 
+
     /**
      * @return string
      */
@@ -230,6 +234,9 @@ class License extends AbstractResourceModel implements ModelInterface
     {
         return $this->expiresAt;
     }
+
+
+
 
     /**
      * @param string $expiresAt
@@ -302,6 +309,8 @@ class License extends AbstractResourceModel implements ModelInterface
     {
         $this->timesActivated = $timesActivated;
     }
+
+   
 
     /**
      * @return int

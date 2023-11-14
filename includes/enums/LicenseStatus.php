@@ -131,4 +131,98 @@ abstract class LicenseStatus
 
         return $oClass->getConstants();
     }
+
+    /**
+     * Creates "Expired" status
+     * @return string
+     */
+    public static function toHtmlExpired( $license, $args = [] ) {
+
+        $args     = wp_parse_args( $args, [ 'style' => 'normal', 'text' => '' ] );
+        $cssClass = $args['style'] === 'normal' ? 'lmfwc-status' : 'lmfwc-status-' . $args['style'];
+
+        return sprintf(
+            '<div class="%s lmfwc-status-inactive"><span class="dashicons dashicons-marker"></span> %s</div>',
+            $cssClass,
+            ! empty( $args['text'] ) ? esc_html( $args['text'] ) : __( 'Expired', 'license-manager-for-woocommerce' )
+        );
+    }
+
+    /**
+     * Show the license status
+     *
+     * @param License $license
+     */
+    public static function toHtml( $license, $args = [] ) {
+
+        $status = ! empty( $license ) ? $license->getStatus() : 'unknown';
+
+        return self::statusToHtml( $status, $args );
+    }
+
+    /**
+     * Returns the license status
+     *
+     * @param $status
+     * @param array $args
+     *
+     * @return string
+     */
+    public static function statusToHtml( $status, $args = [] ) {
+
+        $args     = wp_parse_args( $args, [ 'style' => 'normal', 'text' => '' ] );
+        $cssClass = $args['style'] === 'normal' ? 'lmfwc-status' : 'lmfwc-status-' . $args['style'];
+
+        switch ( $status ) {
+            case 'sold':
+            case LicenseStatus::SOLD:
+                $markup = sprintf(
+                    '<div class="%s lmfwc-status-sold"><span class="dashicons dashicons-saved"></span> %s</div>',
+                    $cssClass,
+                    ! empty( $args['text'] ) ? esc_html( $args['text'] ) : __( 'Sold&nbsp;&nbsp;&nbsp;', 'license-manager-for-woocommerce' )
+                );
+                break;
+            case 'delivered':
+            case LicenseStatus::DELIVERED:
+                $markup = sprintf(
+                    '<div class="%s lmfwc-status-delivered"><span class="dashicons dashicons-saved"></span> %s</div>',
+                    $cssClass,
+                    ! empty( $args['text'] ) ? esc_html( $args['text'] ) : __( 'Delivered', 'license-manager-for-woocommerce' )
+                );
+                break;
+            case 'active':
+            case LicenseStatus::ACTIVE:
+                $markup = sprintf(
+                    '<div class="%s lmfwc-status-active"><span class="dashicons dashicons-marker"></span> %s</div>',
+                    $cssClass,
+                    ! empty( $args['text'] ) ? esc_html( $args['text'] ) : __( 'Active', 'license-manager-for-woocommerce' )
+                );
+                break;
+            case 'inactive':
+            case LicenseStatus::INACTIVE:
+                $markup = sprintf(
+                    '<div class="%s lmfwc-status-inactive"><span class="dashicons dashicons-marker"></span> %s</div>',
+                    $cssClass,
+                    ! empty( $args['text'] ) ? esc_html( $args['text'] ) : __( 'Inactive', 'license-manager-for-woocommerce' )
+                );
+                break;
+            case 'disabled':
+            case LicenseStatus::DISABLED:
+                $markup = sprintf(
+                    '<div class="%s lmfwc-status-disabled"><span class="dashicons dashicons-warning"></span> %s</div>',
+                    $cssClass,
+                    ! empty( $args['text'] ) ? esc_html( $args['text'] ) : __( 'Disabled', 'license-manager-for-woocommerce' )
+                );
+                break;
+            default:
+                $markup = sprintf(
+                    '<div class="%s lmfwc-status-unknown">%s</div>',
+                    $cssClass,
+                    __( 'Unknown', 'license-manager-for-woocommerce' )
+                );
+                break;
+        }
+
+        return $markup;
+    }
 }

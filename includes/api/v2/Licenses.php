@@ -1,6 +1,6 @@
 <?php
 
-namespace LicenseManagerForWooCommerce\API\v2;
+namespace LicenseManagerForWooCommerce\Api\V2;
 
 use DateTime;
 use DateTimeZone;
@@ -10,6 +10,9 @@ use LicenseManagerForWooCommerce\Enums\LicenseSource;
 use LicenseManagerForWooCommerce\Enums\LicenseStatus;
 use LicenseManagerForWooCommerce\Models\Resources\License as LicenseResourceModel;
 use LicenseManagerForWooCommerce\Repositories\Resources\License as LicenseResourceRepository;
+use LicenseManagerForWooCommerce\Repositories\Resources\LicenseActivations as ActivationsResourceRepository;
+use LicenseManagerForWooCommerce\Enums\ActivationSource ;
+
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -120,6 +123,27 @@ class Licenses extends LMFWC_REST_Controller
         );
 
         /**
+         * DELETE licenses/{license_key}
+         *
+         * Updates an already existing license in the database
+         */
+        register_rest_route(
+            $this->namespace, $this->rest_base . '/(?P<license_key>[\w-]+)', array(
+                array(
+                    'methods'             => WP_REST_Server::DELETABLE,
+                    'callback'            => array( $this, 'deleteLicense' ),
+                    'permission_callback' => array( $this, 'permissionCallback' ),
+                    'args'                => array(
+                        'license_key' => array(
+                            'description' => 'License Key',
+                            'type'        => 'string',
+                        ),
+                    ),
+                )
+            )
+        );
+
+        /**
          * GET licenses/activate/{license_key}
          *
          * Activates a license key
@@ -154,6 +178,10 @@ class Licenses extends LMFWC_REST_Controller
                     'args'                => array(
                         'license_key' => array(
                             'description' => 'License Key',
+                            'type'        => 'string'
+                        ),
+                        'token' => array(
+                            'description' => 'Activation Token',
                             'type'        => 'string'
                         )
                     )
@@ -229,6 +257,22 @@ class Licenses extends LMFWC_REST_Controller
         foreach ($licenses as $license) {
             $licenseData = $license->toArray();
 
+              $activations = ActivationsResourceRepository::instance()->findAllBy(
+            array(
+                'license_id' => $license->getId()
+                )
+            );
+
+        $activationData = array();
+
+        foreach ($activations as $activation_data) {
+            $activationData[] = $activation_data->toArray();
+        }
+
+        $licenseData = $license->toArray();
+        $licenseData['activationData'] = $activationData;
+
+
             // Remove the hash, decrypt the license key, and add it to the response
             unset($licenseData['hash']);
             $licenseData['licenseKey'] = $license->getDecryptedLicenseKey();
@@ -278,6 +322,15 @@ class Licenses extends LMFWC_REST_Controller
                     'hash' => apply_filters('lmfwc_hash', $licenseKey)
                 )
             );
+
+             $activations = ActivationsResourceRepository::instance()->findAllBy(
+                    array(
+                        'license_id' => $license->getId()
+                    )
+                );
+                foreach( $activations as $activation_data){
+                    $activation[] = $activation_data->toArray();
+                }
         } catch (Exception $e) {
             return new WP_Error(
                 'lmfwc_rest_data_error',
@@ -301,6 +354,7 @@ class Licenses extends LMFWC_REST_Controller
 
         // Remove the hash and decrypt the license key
         unset($licenseData['hash']);
+        $licenseData['activationData'] = $activation;
         $licenseData['licenseKey'] = $license->getDecryptedLicenseKey();
 
         return $this->response(true, $licenseData, 200, 'v2/licenses/{license_key}');
@@ -342,7 +396,30 @@ class Licenses extends LMFWC_REST_Controller
         $timesActivatedMax = isset($body['times_activated_max']) ? absint($body['times_activated_max'])      : null;
         $statusEnum        = isset($body['status'])              ? sanitize_text_field($body['status'])      : null;
         $status            = null;
+        
+        if ($productId !== null) {
+            $product = wc_get_product($productId);
 
+            if (!$product) {
+                return new WP_Error(
+                    'lmfwc_rest_data_error',
+                    'Product ID is invalid.',
+                    array('status' => 404)
+                );
+            }
+        }
+        if ($userId !== null) {
+            $user_data = get_userdata($userId);
+
+            if (!$user_data) {
+                return new WP_Error(
+                    'lmfwc_rest_data_error',
+                     __('User ID is invalid.', 'license-manager-for-woocommerce'),
+                    array('status' => 404)
+                );
+            }
+        }
+        
         if (!$licenseKey) {
             return new WP_Error(
                 'lmfwc_rest_data_error',
@@ -516,6 +593,10 @@ class Licenses extends LMFWC_REST_Controller
             );
         }
 
+        if (array_key_exists('hash', $updateData)) {
+            unset($updateData['hash']);
+        }
+        
         if (array_key_exists('license_key', $updateData)) {
             if (apply_filters('lmfwc_duplicate', $updateData['license_key'], $license->getId())) {
                 return new WP_Error(
@@ -531,10 +612,6 @@ class Licenses extends LMFWC_REST_Controller
 
         if (array_key_exists('status', $updateData)) {
             $updateData['status'] = $this->getLicenseStatus($updateData['status']);
-        }
-
-        if (array_key_exists('hash', $updateData)) {
-            unset($updateData['hash']);
         }
 
         if (array_key_exists('expires_at', $updateData)) {
@@ -572,6 +649,58 @@ class Licenses extends LMFWC_REST_Controller
     }
 
     /**
+     * Callback for the DELETE licenses/{license_key} route. Deletes an existing license key in the database.
+     *
+     * @param WP_REST_Request $request
+     *
+     * @return WP_REST_Response|WP_Error
+     */
+    public function deleteLicense( WP_REST_Request $request ) {
+        if (!$this->isRouteEnabled($this->settings, '014')) {
+            return $this->routeDisabledError();
+        }
+
+        if (!$this->permissionCheck('license', 'delete')) {
+            return new WP_Error(
+                'lmfwc_rest_cannot_view',
+                __('Sorry, you cannot delete.', 'license-manager-for-woocommerce'),
+                array(
+                    'status' => $this->authorizationRequiredCode()
+                )
+            );
+        }
+        $urlParams = $request->get_url_params();
+
+        $licenseKey = isset( $urlParams['license_key'] ) ? sanitize_text_field( $urlParams['license_key'] ) : '';
+        $oldLicense = LicenseResourceRepository::instance()->findBy(
+            array(
+                'hash' => apply_filters('lmfwc_hash', $licenseKey )
+            )
+        );
+
+        // Update the stock
+        if ( $oldLicense && $oldLicense->getProductId() !== null && $oldLicense->getStatus() === LicenseStatus::ACTIVE ) {
+            apply_filters('lmfwc_stock_decrease', $oldLicense->getProductId());
+        }
+
+        $license = LicenseResourceRepository::instance()->deleteBy(
+            array(
+                'hash' => apply_filters('lmfwc_hash', $licenseKey ),
+            )
+        );
+
+        if (!$license) {
+            return new WP_Error(
+                'lmfwc_rest_data_error',
+                'The license key could not be found or deleted.',
+                array('status' => 404)
+            );
+        }
+        return $this->response( true, [], 200, 'v2/licenses/{license_key}' );
+
+    }
+
+    /**
      * Callback for the GET licenses/activate/{license_key} route. This will activate a license key (if possible)
      *
      * @param WP_REST_Request $request
@@ -579,125 +708,6 @@ class Licenses extends LMFWC_REST_Controller
      * @return WP_REST_Response|WP_Error
      */
     public function activateLicense(WP_REST_Request $request)
-    {
-        if (!$this->isRouteEnabled($this->settings, '014')) {
-            return $this->routeDisabledError();
-        }
-
-        if (!$this->permissionCheck('license', 'edit')) {
-            return new WP_Error(
-                'lmfwc_rest_cannot_edit',
-                __('Sorry, you are not allowed to edit this resource.', 'license-manager-for-woocommerce'),
-                array(
-                    'status' => $this->authorizationRequiredCode()
-                )
-            );
-        }
-
-        $licenseKey = sanitize_text_field($request->get_param('license_key'));
-
-        if (!$licenseKey) {
-            return new WP_Error(
-                'lmfwc_rest_data_error',
-                'License key is invalid.',
-                array('status' => 404)
-            );
-        }
-
-        try {
-            /** @var LicenseResourceModel $license */
-            $license = LicenseResourceRepository::instance()->findBy(
-                array(
-                    'hash' => apply_filters('lmfwc_hash', $licenseKey)
-                )
-            );
-        } catch (Exception $e) {
-            return new WP_Error(
-                'lmfwc_rest_data_error',
-                $e->getMessage(),
-                array('status' => 404)
-            );
-        }
-
-        if (!$license) {
-            return new WP_Error(
-                'lmfwc_rest_data_error',
-                sprintf(
-                    'License Key: %s could not be found.',
-                    $licenseKey
-                ),
-                array('status' => 404)
-            );
-        }
-
-        if (false !== $licenseExpired = $this->hasLicenseExpired($license)) {
-            return $licenseExpired;
-        }
-
-        $timesActivated    = null;
-        $timesActivatedMax = null;
-
-        if ($license->getTimesActivated() !== null) {
-            $timesActivated = absint($license->getTimesActivated());
-        }
-
-        if ($license->getTimesActivatedMax() !== null) {
-            $timesActivatedMax = absint($license->getTimesActivatedMax());
-        }
-
-        if ($timesActivatedMax && ($timesActivated >= $timesActivatedMax)) {
-            return new WP_Error(
-                'lmfwc_rest_data_error',
-                sprintf(
-                    'License Key: %s reached maximum activation count.',
-                    $licenseKey
-                ),
-                array('status' => 404)
-            );
-        }
-
-        // Activate the license key
-        try {
-            if (!$timesActivated) {
-                $timesActivatedNew = 1;
-            }
-
-            else {
-                $timesActivatedNew = intval($timesActivated) + 1;
-            }
-
-            /** @var LicenseResourceModel $updatedLicense */
-            $updatedLicense = LicenseResourceRepository::instance()->update(
-                $license->getId(),
-                array(
-                    'times_activated' => $timesActivatedNew
-                )
-            );
-        } catch (Exception $e) {
-            return new WP_Error(
-                'lmfwc_rest_data_error',
-                $e->getMessage(),
-                array('status' => 404)
-            );
-        }
-
-        $licenseData = $updatedLicense->toArray();
-
-        // Remove the hash and decrypt the license key
-        unset($licenseData['hash']);
-        $licenseData['licenseKey'] = $updatedLicense->getDecryptedLicenseKey();
-
-        return $this->response(true, $licenseData, 200, 'v2/licenses/activate/{license_key}');
-    }
-
-    /**
-     * Callback for the GET licenses/deactivate/{license_key} route. This will deactivate a license key (if possible)
-     *
-     * @param WP_REST_Request $request
-     *
-     * @return WP_REST_Response|WP_Error
-     */
-    public function deactivateLicense(WP_REST_Request $request)
     {
         if (!$this->isRouteEnabled($this->settings, '015')) {
             return $this->routeDisabledError();
@@ -714,7 +724,14 @@ class Licenses extends LMFWC_REST_Controller
         }
 
         $licenseKey = sanitize_text_field($request->get_param('license_key'));
-
+        $activationLabel = $request->get_param('label');
+        $activationToken = $request->get_param('token');
+        $activationMeta  = is_array( $request->get_param('meta') ) ? $request->get_param('meta') : array();
+        $args = array(
+            'label' => $activationLabel,
+            'meta'  => $activationMeta,
+            'token' => $activationToken
+        );
         if (!$licenseKey) {
             return new WP_Error(
                 'lmfwc_rest_data_error',
@@ -723,78 +740,54 @@ class Licenses extends LMFWC_REST_Controller
             );
         }
 
-        try {
-            /** @var LicenseResourceModel $license */
-            $license = LicenseResourceRepository::instance()->findBy(
+        $licenseData = lmfwc_activate_license($licenseKey, $args );
+
+        return $this->response(true, $licenseData, 200, 'v2/licenses/activate/{license_key}');
+    }
+
+    /**
+     * Callback for the GET licenses/deactivate/{license_key} route. This will deactivate a license key (if possible)
+     *
+     * @param WP_REST_Request $request
+     *
+     * @return WP_REST_Response|WP_Error
+     */
+    public function deactivateLicense( WP_REST_Request $request )
+    {
+        if (!$this->isRouteEnabled($this->settings, '016')) {
+            return $this->routeDisabledError();
+        }
+
+        if (!$this->permissionCheck('license', 'edit')) {
+            return new WP_Error(
+                'lmfwc_rest_cannot_edit',
+                __('Sorry, you are not allowed to edit this resource.', 'license-manager-for-woocommerce'),
                 array(
-                    'hash' => apply_filters('lmfwc_hash', $licenseKey)
+                    'status' => $this->authorizationRequiredCode()
                 )
             );
-        } catch (Exception $e) {
+        }
+
+         $licenseKey = sanitize_text_field($request->get_param('license_key'));
+      
+
+        $params = $request->get_params();
+        $token = isset( $params['token'] ) ? sanitize_text_field( $params['token'] ) : '';
+        $args = array( 
+            'token' => $token 
+        );
+
+        if ( empty( $licenseKey ) ) {
             return new WP_Error(
                 'lmfwc_rest_data_error',
-                $e->getMessage(),
+                'License Key is invalid.',
                 array('status' => 404)
             );
         }
 
-        if (!$license) {
-            return new WP_Error(
-                'lmfwc_rest_data_error',
-                sprintf(
-                    'License Key: %s could not be found.',
-                    $licenseKey
-                ),
-                array('status' => 404)
-            );
-        }
-
-        if (false !== $licenseExpired = $this->hasLicenseExpired($license)) {
-            return $licenseExpired;
-        }
-
-        $timesActivated = null;
-
-        if ($license->getTimesActivated() !== null) {
-            $timesActivated = absint($license->getTimesActivated());
-        }
-
-        if (!$timesActivated || $timesActivated == 0) {
-            return new WP_Error(
-                'lmfwc_rest_data_error',
-                sprintf(
-                    'License Key: %s has not been activated yet.',
-                    $licenseKey
-                ),
-                array('status' => 404)
-            );
-        }
-
-        // Deactivate the license key
-        try {
-            $timesActivatedNew = intval($timesActivated) - 1;
-
-            /** @var LicenseResourceModel $updatedLicense */
-            $updatedLicense = LicenseResourceRepository::instance()->update(
-                $license->getId(),
-                array(
-                    'times_activated' => $timesActivatedNew
-                )
-            );
-        } catch (Exception $e) {
-            return new WP_Error(
-                'lmfwc_rest_data_error',
-                $e->getMessage(),
-                array('status' => 404)
-            );
-        }
-
-        $licenseData = $updatedLicense->toArray();
-
-        // Remove the hash and decrypt the license key
-        unset($licenseData['hash']);
-        $licenseData['licenseKey'] = $updatedLicense->getDecryptedLicenseKey();
-
+        
+        $licenseData = lmfwc_deactivate_license( $licenseKey, $args );
+        
         return $this->response(true, $licenseData, 200, 'v2/licenses/deactivate/{license_key}');
     }
 
@@ -808,7 +801,7 @@ class Licenses extends LMFWC_REST_Controller
      */
     public function validateLicense(WP_REST_Request $request)
     {
-        if (!$this->isRouteEnabled($this->settings, '016')) {
+        if (!$this->isRouteEnabled($this->settings, '017')) {
             return $this->routeDisabledError();
         }
 
@@ -823,6 +816,7 @@ class Licenses extends LMFWC_REST_Controller
         }
 
         $urlParams = $request->get_url_params();
+        $activationToken = $request->get_param('token');
 
         if (!array_key_exists('license_key', $urlParams)) {
             return new WP_Error(
@@ -849,6 +843,21 @@ class Licenses extends LMFWC_REST_Controller
                     'hash' => apply_filters('lmfwc_hash', $licenseKey)
                 )
             );
+
+            if ( $activationToken ) {
+                $activation = ActivationsResourceRepository::instance()->findBy(
+                    array(
+                        'token' => $activationToken,
+                        'deactivated_at' => null
+                    )
+                );
+            } else {
+                $activation = ActivationsResourceRepository::instance()->findAllBy(
+                    array(
+                        'license_id' => $license->getId()
+                    )
+                );
+            }
         } catch (Exception $e) {
             return new WP_Error(
                 'lmfwc_rest_data_error',
@@ -867,11 +876,14 @@ class Licenses extends LMFWC_REST_Controller
                 array('status' => 404)
             );
         }
-
+            foreach( $activation as $act){
+            $activation_data[] = $act->toArray();
+        }
         $result = array(
             'timesActivated'       => intval($license->getTimesActivated()),
             'timesActivatedMax'    => intval($license->getTimesActivatedMax()),
-            'remainingActivations' => intval($license->getTimesActivatedMax()) - intval($license->getTimesActivated())
+            'remainingActivations' => intval($license->getTimesActivatedMax()) - intval($license->getTimesActivated()),
+            'activationData'      => $activation_data
         );
 
         return $this->response(true, $result, 200, 'v2/licenses/validate/{license_key}');
@@ -896,7 +908,7 @@ class Licenses extends LMFWC_REST_Controller
             if ($dateNow > $dateExpiresAt) {
                 return new WP_Error(
                     'lmfwc_rest_license_expired',
-                    sprintf('The license Key expired on %s (UTC).', $license->getExpiresAt()),
+                    sprintf('The license Key expired at %s.', wp_date( lmfwc_expiration_format(), strtotime( $license->getExpiresAt() ) )),
                     array('status' => 405)
                 );
             }
@@ -905,3 +917,5 @@ class Licenses extends LMFWC_REST_Controller
         return false;
     }
 }
+
+

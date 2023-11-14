@@ -80,12 +80,13 @@ class ProductData
         global $post;
 
         /** @var GeneratorResourceModel[] $generators */
+        $product = wc_get_product($post->ID);
         $generators        = GeneratorResourceRepository::instance()->findAll();
-        $licensed          = get_post_meta($post->ID, 'lmfwc_licensed_product',                    true);
-        $deliveredQuantity = get_post_meta($post->ID, 'lmfwc_licensed_product_delivered_quantity', true);
-        $generatorId       = get_post_meta($post->ID, 'lmfwc_licensed_product_assigned_generator', true);
-        $useGenerator      = get_post_meta($post->ID, 'lmfwc_licensed_product_use_generator',      true);
-        $useStock          = get_post_meta($post->ID, 'lmfwc_licensed_product_use_stock',          true);
+        $licensed          = $product->get_meta( 'lmfwc_licensed_product',  true);
+        $deliveredQuantity = $product->get_meta( 'lmfwc_licensed_product_delivered_quantity', true);
+        $generatorId       = $product->get_meta( 'lmfwc_licensed_product_assigned_generator', true);
+        $useGenerator      = $product->get_meta( 'lmfwc_licensed_product_use_generator', true);
+        $useStock          = $product->get_meta( 'lmfwc_licensed_product_use_stock', true);
         $generatorOptions  = array('' => __('Please select a generator', 'license-manager-for-woocommerce'));
 
         if ($generators) {
@@ -218,38 +219,34 @@ class ProductData
         ) {
             return;
         }
-
+         $product = wc_get_product( $postId );
         // Update licensed product flag, according to checkbox.
         if (array_key_exists('lmfwc_licensed_product', $_POST)) {
-            update_post_meta($postId, 'lmfwc_licensed_product', 1);
+            $product->update_meta_data( 'lmfwc_licensed_product', 1);
         }
 
         else {
-            update_post_meta($postId, 'lmfwc_licensed_product', 0);
+             $product->update_meta_data( 'lmfwc_licensed_product', 0);
         }
 
         // Update delivered quantity, according to field.
         $deliveredQuantity = absint($_POST['lmfwc_licensed_product_delivered_quantity']);
 
-        update_post_meta(
-            $postId,
-            'lmfwc_licensed_product_delivered_quantity',
+        $product->update_meta_data( 'lmfwc_licensed_product_delivered_quantity',
             $deliveredQuantity ? $deliveredQuantity : 1
         );
 
         // Update the use stock flag, according to checkbox.
         if (array_key_exists('lmfwc_licensed_product_use_stock', $_POST)) {
-            update_post_meta($postId, 'lmfwc_licensed_product_use_stock', 1);
+            $product->update_meta_data( 'lmfwc_licensed_product_use_stock', 1);
         }
 
         else {
-            update_post_meta($postId, 'lmfwc_licensed_product_use_stock', 0);
+            $product->update_meta_data( 'lmfwc_licensed_product_use_stock', 0);
         }
 
         // Update the assigned generator id, according to select field.
-        update_post_meta(
-            $postId,
-            'lmfwc_licensed_product_assigned_generator',
+        $product->update_meta_data( 'lmfwc_licensed_product_assigned_generator',
             intval($_POST['lmfwc_licensed_product_assigned_generator'])
         );
 
@@ -260,19 +257,20 @@ class ProductData
                 $error = new WP_Error(2, __('Assign a generator if you wish to sell automatically generated licenses for this product.', 'license-manager-for-woocommerce'));
 
                 set_transient('lmfwc_error', $error, 45);
-                update_post_meta($postId, 'lmfwc_licensed_product_use_generator', 0);
-                update_post_meta($postId, 'lmfwc_licensed_product_assigned_generator', 0);
+                $product->update_meta_data( 'lmfwc_licensed_product_use_generator', 0);
+                $product->update_meta_data( 'lmfwc_licensed_product_assigned_generator', 0);
             }
 
             else {
-                update_post_meta($postId, 'lmfwc_licensed_product_use_generator', 1);
+                $product->update_meta_data( 'lmfwc_licensed_product_use_generator', 1);
             }
         }
 
         else {
-            update_post_meta($postId, 'lmfwc_licensed_product_use_generator', 0);
-            update_post_meta($postId, 'lmfwc_licensed_product_assigned_generator', 0);
+             $product->update_meta_data( 'lmfwc_licensed_product_use_generator', 0);
+             $product->update_meta_data( 'lmfwc_licensed_product_assigned_generator', 0);
         }
+        $product->save();
 
         do_action('lmfwc_product_data_save_post', $postId);
     }
@@ -289,11 +287,12 @@ class ProductData
         /** @var GeneratorResourceModel[] $generators */
         $generators        = GeneratorResourceRepository::instance()->findAll();
         $productId         = $variation->ID;
-        $licensed          = get_post_meta($productId, 'lmfwc_licensed_product',                    true);
-        $deliveredQuantity = get_post_meta($productId, 'lmfwc_licensed_product_delivered_quantity', true);
-        $generatorId       = get_post_meta($productId, 'lmfwc_licensed_product_assigned_generator', true);
-        $useGenerator      = get_post_meta($productId, 'lmfwc_licensed_product_use_generator',      true);
-        $useStock          = get_post_meta($productId, 'lmfwc_licensed_product_use_stock',          true);
+        $product = wc_get_product($productId);
+        $licensed          = $product->get_meta( 'lmfwc_licensed_product',  true);
+        $deliveredQuantity = $product->get_meta( 'lmfwc_licensed_product_delivered_quantity', true);
+        $generatorId       = $product->get_meta( 'lmfwc_licensed_product_assigned_generator', true);
+        $useGenerator      = $product->get_meta( 'lmfwc_licensed_product_use_generator',true);
+        $useStock          = $product->get_meta( 'lmfwc_licensed_product_use_stock', true);
         $generatorOptions  = array('' => __('Please select a generator', 'license-manager-for-woocommerce'));
 
         /** @var GeneratorResourceModel $generator */
@@ -403,22 +402,21 @@ class ProductData
      * @param int $i
      */
     public function variableProductLicenseManagerSaveAction($variationId, $i)
-    {
+    {   
+          $variation = wc_get_product( $variationId );
         // Update licensed product flag, according to checkbox.
         if (array_key_exists('lmfwc_licensed_product', $_POST)
             && array_key_exists($i, $_POST['lmfwc_licensed_product'])
         ) {
-            update_post_meta($variationId, 'lmfwc_licensed_product', 1);
+            $variation->update_meta_data( 'lmfwc_licensed_product', 1);
         } else {
-            update_post_meta($variationId, 'lmfwc_licensed_product', 0);
+           $variation->update_meta_data( 'lmfwc_licensed_product', 0);
         }
 
         // Update delivered quantity, according to field.
         $deliveredQuantity = absint($_POST['lmfwc_licensed_product_delivered_quantity'][$i]);
 
-        update_post_meta(
-            $variationId,
-            'lmfwc_licensed_product_delivered_quantity',
+       $variation->update_meta_data('lmfwc_licensed_product_delivered_quantity',
             $deliveredQuantity ? $deliveredQuantity : 1
         );
 
@@ -426,15 +424,13 @@ class ProductData
         if (array_key_exists('lmfwc_licensed_product_use_stock', $_POST)
             && array_key_exists($i, $_POST['lmfwc_licensed_product_use_stock'])
         ) {
-            update_post_meta($variationId, 'lmfwc_licensed_product_use_stock', 1);
+           $variation->update_meta_data( 'lmfwc_licensed_product_use_stock', 1);
         } else {
-            update_post_meta($variationId, 'lmfwc_licensed_product_use_stock', 0);
+           $variation->update_meta_data( 'lmfwc_licensed_product_use_stock', 0);
         }
 
         // Update the assigned generator id, according to select field.
-        update_post_meta(
-            $variationId,
-            'lmfwc_licensed_product_assigned_generator',
+       $variation->update_meta_data( 'lmfwc_licensed_product_assigned_generator',
             intval($_POST['lmfwc_licensed_product_assigned_generator'][$i])
         );
 
@@ -447,14 +443,15 @@ class ProductData
                 $error = new WP_Error(2, __('Assign a generator if you wish to sell automatically generated licenses for this product.', 'license-manager-for-woocommerce'));
 
                 set_transient('lmfwc_error', $error, 45);
-                update_post_meta($variationId, 'lmfwc_licensed_product_use_generator', 0);
-                update_post_meta($variationId, 'lmfwc_licensed_product_assigned_generator', 0);
+               $variation->update_meta_data( 'lmfwc_licensed_product_use_generator', 0);
+               $variation->update_meta_data( 'lmfwc_licensed_product_assigned_generator', 0);
             } else {
-                update_post_meta($variationId, 'lmfwc_licensed_product_use_generator', 1);
+               $variation->update_meta_data( 'lmfwc_licensed_product_use_generator', 1);
             }
         } else {
-            update_post_meta($variationId, 'lmfwc_licensed_product_use_generator', 0);
-            update_post_meta($variationId, 'lmfwc_licensed_product_assigned_generator', 0);
+           $variation->update_meta_data( 'lmfwc_licensed_product_use_generator', 0);
+           $variation->update_meta_data( 'lmfwc_licensed_product_assigned_generator', 0);
         }
+        $variation->save();
     }
 }

@@ -21,8 +21,11 @@
 
 use LicenseManagerForWooCommerce\Models\Resources\License as LicenseResourceModel;
 use LicenseManagerForWooCommerce\Settings;
+use LicenseManagerForWooCommerce\Integrations\WooCommerce\Controller;
 
 defined('ABSPATH') || exit; ?>
+
+<?php if ( ! empty( $licenseKeys ) ): ?>
 
 <h2><?php _e('Your license keys', 'license-manager-for-woocommerce'); ?></h2>
 
@@ -41,60 +44,57 @@ defined('ABSPATH') || exit; ?>
 
     <table class="shop_table shop_table_responsive my_account_orders">
         <thead>
-        <tr>
-            <th class="license-key"><?php _e('License key', 'license-manager-for-woocommerce'); ?></th>
-            <th class="activation"><?php _e('Activation status', 'license-manager-for-woocommerce'); ?></th>
-            <th class="valid-until"><?php _e('Valid until', 'license-manager-for-woocommerce'); ?></th>
-            <th class="actions"></th>
-        </tr>
+            <tr>
+                <th class="license-key"><?php _e('License key', 'license-manager-for-woocommerce'); ?></th>
+                <th class="activation"><?php _e('Activation status', 'license-manager-for-woocommerce'); ?></th>
+                <th class="valid-until"><?php _e('Valid until', 'license-manager-for-woocommerce'); ?></th>
+                <th class="actions"></th>
+            </tr>
         </thead>
 
         <tbody>
 
-        <?php
-        /** @var LicenseResourceModel $license */
-        foreach ($licenseKeyData['licenses'] as $license):
-            $timesActivated    = $license->getTimesActivated() ? $license->getTimesActivated() : '0';
-            $timesActivatedMax = $license->getTimesActivatedMax() ? $license->getTimesActivatedMax() : '&infin;';
-            $order             = wc_get_order($license->getOrderId());
-            ?>
-            <tr>
-                <td><span class="lmfwc-myaccount-license-key"><?php echo $license->getDecryptedLicenseKey(); ?></span></td>
-                <td>
-                    <span><?php esc_html_e($timesActivated); ?></span>
-                    <span>/</span>
-                    <span><?php echo $timesActivatedMax; ?></span>
-                </td>
-                <td><?php
+            <?php
+            /** @var LicenseResourceModel $license */
+            foreach ($licenseKeyData['licenses'] as $license):
+                $timesActivated    = $license->getTimesActivated() ? $license->getTimesActivated() : '0';
+                $timesActivatedMax = $license->getTimesActivatedMax() ? $license->getTimesActivatedMax() : '&infin;';
+                $order             = wc_get_order($license->getOrderId());
+                ?>
+                <tr>
+                    <td><span class="lmfwc-myaccount-license-key"><?php echo $license->getDecryptedLicenseKey(); ?></span></td>
+                    <td>
+                        <span><?php esc_html_e($timesActivated); ?></span>
+                        <span>/</span>
+                        <span><?php echo $timesActivatedMax; ?></span>
+                    </td>
+                    <td><?php
                     if ($license->getExpiresAt()) {
-                        $date = new \DateTime($license->getExpiresAt());
-                        printf('<b>%s</b>', $date->format($dateFormat));
-                    }
-                    ?></td>
-                <td class="license-key-actions">
-                    <?php if (Settings::get('lmfwc_allow_users_to_activate')): ?>
-                        <form method="post" style="display: inline-block; margin: 0;">
-                            <input type="hidden" name="license" value="<?php echo $license->getDecryptedLicenseKey();?>"/>
-                            <input type="hidden" name="action" value="activate">
-                            <?php wp_nonce_field('lmfwc_myaccount_activate_license'); ?>
-                            <button class="button" type="submit"><?php _e('Activate', 'license-manager-for-woocommerce');?></button>
-                        </form>
-                    <?php endif; ?>
+                        printf('<b>%s</b>', wp_date(lmfwc_expiration_format(), strtotime($license->getExpiresAt())));
+                    } elseif ($license->getValidFor()) {
+                        $validDate = date('Y-m-d', strtotime($order->get_date_paid() . ' + ' . $license->getValidFor() . ' days'));
+                        printf('<b>%s</b>', wp_date(lmfwc_expiration_format(), strtotime($validDate)));
+                    } else {
+                     echo __('Never Expires', 'license-manager-for-woocommerce');
+                 }?>
+                 
+             </td>
+             <td class="license-key-actions">
+                 
+               <a href="<?php echo esc_url(esc_url( Controller::getAccountLicenseUrl( $license->getId() ) )); ?>" class="button view"><?php _e('View', 'license-manager-for-woocommerce');?></a>
 
-                    <?php if (Settings::get('lmfwc_allow_users_to_deactivate')): ?>
-                        <form method="post" style="display: inline-block; margin: 0;">
-                            <input type="hidden" name="license" value="<?php echo $license->getDecryptedLicenseKey();?>"/>
-                            <input type="hidden" name="action" value="deactivate">
-                            <?php wp_nonce_field('lmfwc_myaccount_deactivate_license'); ?>
-                            <button class="button" type="submit"><?php _e('Deactivate', 'license-manager-for-woocommerce');?></button>
-                        </form>
-                    <?php endif; ?>
-
-                    <a href="<?php echo esc_url($order->get_view_order_url()); ?>" class="button view"><?php _e('Order', 'license-manager-for-woocommerce');?></a>
-                </td>
-            </tr>
-        <?php endforeach; ?>
-
-        </tbody>
-    </table>
+               <a href="<?php echo esc_url($order->get_view_order_url()); ?>" class="button view"><?php _e('Order', 'license-manager-for-woocommerce');?></a>
+           </td>
+       </tr>
+   <?php endforeach; 
+   ?>
+</tbody>
+</table>
 <?php endforeach; ?>
+
+<?php else: ?>
+
+    <div class="woocommerce-Message woocommerce-Message--info woocommerce-info">
+        <?php _e( 'No licenses available yet', 'license-manager-for-woocommerce' ); ?>
+    </div>
+<?php endif; ?>

@@ -36,7 +36,7 @@ class Stock
     private function modify($product, $action, $amount = 1)
     {
         // Check if the setting is enabled
-        if (!Settings::get('lmfwc_enable_stock_manager')) {
+        if (!Settings::get('lmfwc_enable_stock_manager' , Settings::SECTION_WOOCOMMERCE)) {
             return false;
         }
 
@@ -104,52 +104,77 @@ class Stock
      *
      * @return int
      */
-    public function synchronize()
-    {
+    public function synchronize() {
         // For the query to return any results, the following WooCommerce Product settings need to be enabled:
         // 1. Inventory       -> Manage stock?
         // 2. License Manager -> Sell license keys
         // 3. License Manager -> Sell from stock
         $args = array(
-            'limit'                            => -1,
+            'limit'                            => - 1,
             'orderBy'                          => 'id',
             'order'                            => 'ASC',
             'manage_stock'                     => true,
             'lmfwc_licensed_product'           => true,
-            'lmfwc_licensed_product_use_stock' => true
+            'lmfwc_licensed_product_use_stock' => true,
         );
-
-        $products     = wc_get_products($args);
+        
+        $products     = wc_get_products( $args );
         $synchronized = 0;
-
+        
+        $variation_products = wc_get_products( array(
+            'type' => 'variation',
+            'limit' => -1,
+            'manage_stock'                     => true,
+            'lmfwc_licensed_product'           => true,
+            'lmfwc_licensed_product_use_stock' => true,
+        ) );
+        
         // No such products, nothing to do
-        if (count($products) === 0) {
+        if ( count( $products ) === 0 ) {
             return $synchronized;
         }
-
-        /** @var WC_Product $product */
-        foreach ($products as $product) {
-            $woocommerceStock = intval($product->get_stock_quantity());
+        foreach ( $variation_products as $product ) {
+            $woocommerceStock = (int) $product->get_stock_quantity();
             $licenseStock     = License::instance()->countBy(
                 array(
                     'status'     => LicenseStatus::ACTIVE,
-                    'product_id' => $product->get_id()
+                    'product_id' => $product->get_id(),
                 )
             );
 
             // Nothing to do in this case
-            if ($woocommerceStock === $licenseStock) {
+            if ( $woocommerceStock === $licenseStock ) {
                 continue;
             }
 
             // Update the stock
-            $product->set_stock_quantity($licenseStock);
+            $product->set_stock_quantity( $licenseStock );
             $product->save();
-            $synchronized++;
+            $synchronized ++;
+        }
+        foreach ( $products as $product ) {
+            $woocommerceStock = (int) $product->get_stock_quantity();
+            $licenseStock     = License::instance()->countBy(
+                array(
+                    'status'     => LicenseStatus::ACTIVE,
+                    'product_id' => $product->get_id(),
+                )
+            );
+
+            // Nothing to do in this case
+            if ( $woocommerceStock === $licenseStock ) {
+                continue;
+            }
+
+            // Update the stock
+            $product->set_stock_quantity( $licenseStock );
+            $product->save();
+            $synchronized ++;
         }
 
         return $synchronized;
     }
+
 
     /**
      * @param array $query

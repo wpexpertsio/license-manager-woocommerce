@@ -4,6 +4,7 @@ namespace LicenseManagerForWooCommerce\Abstracts;
 
 use LicenseManagerForWooCommerce\Enums\ColumnType as ColumnTypeEnum;
 use LicenseManagerForWooCommerce\Interfaces\ResourceRepository as RepositoryInterface;
+use LicenseManagerForWooCommerce\Setup;
 
 defined('ABSPATH') || exit;
 
@@ -29,6 +30,15 @@ abstract class ResourceRepository extends Singleton implements RepositoryInterfa
      */
     protected $mapping;
 
+    
+    protected $useCreatedBy = true;
+
+    protected $useCreatedAt = true;
+
+    protected $useUpdatedAt = true;
+
+    protected $useUpdatedBy = true;
+
     /**
      * Sanitizes the user data when adding or updating entities.
      *
@@ -39,13 +49,17 @@ abstract class ResourceRepository extends Singleton implements RepositoryInterfa
     function sanitize(&$data)
     {
         foreach ($data as $column => $value) {
+
             switch ($this->mapping[$column]) {
+
                 case ColumnTypeEnum::CHAR:
                 case ColumnTypeEnum::VARCHAR:
                 case ColumnTypeEnum::LONGTEXT:
                 case ColumnTypeEnum::DATETIME:
+                case ColumnTypeEnum::SERIALIZED:
+
                     if ($data[$column] !== null) {
-                        $data[$column] = sanitize_text_field($value);
+                        $data[$column] = ($value);
                     }
                     break;
                 case ColumnTypeEnum::INT:
@@ -58,6 +72,8 @@ abstract class ResourceRepository extends Singleton implements RepositoryInterfa
             }
         }
     }
+
+   
 
     /**
      * Adds a new entry to the table.
@@ -74,18 +90,21 @@ abstract class ResourceRepository extends Singleton implements RepositoryInterfa
             'created_at' => gmdate('Y-m-d H:i:s'),
             'created_by' => get_current_user_id()
         );
-
+        
         // Pass the data by reference and sanitize its contents
         $this->sanitize($data);
-
+        if ( $wpdb->prefix . Setup::ACTIVATIONS_TABLE_NAME == $this->table ) {
+            unset($meta['created_by']);
+        }
         $insert = $wpdb->insert($this->table, array_merge($data, $meta));
 
         if (!$insert) {
             return false;
         }
-
+        
         return $this->find($wpdb->insert_id);
     }
+
 
     /**
      * Retrieves a single table row by its ID.
@@ -205,37 +224,41 @@ abstract class ResourceRepository extends Singleton implements RepositoryInterfa
         return $result;
     }
 
+
+
     /**
      * Updates a single table row by its ID.
      *
-     * @param int   $id
+     * @param int $id
      * @param array $data
      *
-     * @return bool|ResourceModel
+     * @return bool|AbstractResourceModel
      */
-    public function update($id, $data)
-    {
+    public function update( $id, $data ) {
         global $wpdb;
 
-        $meta = array(
-            'updated_at' => gmdate('Y-m-d H:i:s'),
-            'updated_by' => get_current_user_id()
-        );
+        $meta = array();
+        if ( $this->useUpdatedAt ) {
+            $meta['updated_at'] = gmdate( 'Y-m-d H:i:s' );
+        }
+        if ( $this->useUpdatedBy ) {
+            $meta['updated_by'] = get_current_user_id();
+        }
 
         // Pass the data by reference and sanitize its contents
-        $this->sanitize($data);
+        $this->sanitize( $data );
 
         $updated = $wpdb->update(
             $this->table,
-            array_merge($data, $meta),
-            array('id' => $id)
+            array_merge( $data, $meta ),
+            array( 'id' => $id )
         );
 
-        if (!$updated) {
+        if ( ! $updated ) {
             return false;
         }
 
-        return $this->find($id);
+        return $this->find( $id );
     }
 
     /**
@@ -296,11 +319,16 @@ abstract class ResourceRepository extends Singleton implements RepositoryInterfa
      */
     public function delete($ids)
     {
+
         global $wpdb;
+
+        if ( ! is_array( $ids ) ) {
+            $ids = (array) $ids;
+        }
 
         $ids = implode(', ', array_map('absint', $ids));
         $sqlQuery = "DELETE FROM {$this->table} WHERE {$this->primaryKey} IN ({$ids});";
-
+        
         return $wpdb->query($sqlQuery);
     }
 
@@ -313,16 +341,18 @@ abstract class ResourceRepository extends Singleton implements RepositoryInterfa
      */
     public function deleteBy($query)
     {
+
         if (!$query || !is_array($query) || count($query) <= 0) {
             return false;
         }
+         
 
         global $wpdb;
 
         $sqlQuery = "DELETE FROM {$this->table} WHERE 1=1 ";
         $sqlQuery .= $this->parseQueryConditions($query);
         $sqlQuery .= ';';
-
+      
         return $wpdb->query($sqlQuery);
     }
 
@@ -401,6 +431,7 @@ abstract class ResourceRepository extends Singleton implements RepositoryInterfa
         $result = '';
 
         foreach ($query as $columnName => $value) {
+
             if (is_array($value)) {
                 $valuesIn = implode(', ', array_map('absint', $value));
                 $result .= "AND {$columnName} IN ({$valuesIn}) ";
@@ -419,8 +450,9 @@ abstract class ResourceRepository extends Singleton implements RepositoryInterfa
                 $result .= "AND {$columnName} IS NULL ";
             }
         }
-
+      
         return $result;
+
     }
 
     /**

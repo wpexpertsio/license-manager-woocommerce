@@ -24,14 +24,15 @@ class General
         $args = array(
             'sanitize_callback' => array($this, 'sanitize')
         );
+    
 
         // Register the initial settings group.
-        register_setting('lmfwc_settings_group_general', 'lmfwc_settings_general', $args);
+        register_setting('lmfwc_settings_group_general', 'lmfwc_settings_general', $args) ;
 
         // Initialize the individual sections
         $this->initSectionLicenseKeys();
-        $this->initSectionMyAccount();
         $this->initSectionAPI();
+        
     }
 
     /**
@@ -43,34 +44,11 @@ class General
      */
     public function sanitize($settings)
     {
-        if (isset($_POST['lmfwc_stock_synchronize'])) {
-            // Permission check
-            if (!current_user_can('manage_options')) {
-                return $settings;
-            }
-
-            /** @var int $productsSynchronized Number of synchronized products */
-            $productsSynchronized = apply_filters('lmfwc_stock_synchronize', null);
-
-            if ($productsSynchronized > 0) {
-                add_settings_error(
-                    'lmfwc_settings_group_general',
-                    'lmfwc_stock_update',
-                    sprintf(__('Successfully updated the stock of %d WooCommerce products.', 'license-manager-for-woocommerce'), $productsSynchronized),
-                    'success'
-                );
-            } else {
-                add_settings_error(
-                    'lmfwc_settings_group_general',
-                    'lmfwc_stock_update',
-                    __('The stock of all WooCommerce products is already synchronized.', 'license-manager-for-woocommerce'),
-                    'success'
-                );
-            }
-        }
-
+    
         return $settings;
     }
+
+    
 
     /**
      * Initializes the "lmfwc_license_keys" section.
@@ -97,70 +75,44 @@ class General
         );
 
         add_settings_field(
-            'lmfwc_auto_delivery',
-            __('Automatic delivery', 'license-manager-for-woocommerce'),
-            array($this, 'fieldAutoDelivery'),
-            'lmfwc_license_keys',
-            'license_keys_section'
-        );
-
-        add_settings_field(
             'lmfwc_allow_duplicates',
             __('Allow duplicates', 'license-manager-for-woocommerce'),
             array($this, 'fieldAllowDuplicates'),
             'lmfwc_license_keys',
             'license_keys_section'
         );
-
-        add_settings_field(
-            'lmfwc_enable_stock_manager',
-            __('Stock management', 'license-manager-for-woocommerce'),
-            array($this, 'fieldEnableStockManager'),
+         add_settings_field(
+            'lmfwc_expire_format',
+            __('License expiration format', 'license-manager-for-woocommerce'),
+            array($this, 'fieldExpireFormat'),
             'lmfwc_license_keys',
             'license_keys_section'
         );
     }
 
-    /**
-     * Initializes the "lmfwc_my_account" section.
-     *
-     * @return void
-     */
-    private function initSectionMyAccount()
-    {
-        // Add the settings sections.
-        add_settings_section(
-            'my_account_section',
-            __('My account', 'license-manager-for-woocommerce'),
-            null,
-            'lmfwc_my_account'
-        );
+    public function fieldExpireFormat( ) {
+        $field = 'lmfwc_expire_format';
+        $value = isset($this->settings[$field]) ? $this->settings[$field] : '';
+        $html = '<fieldset>';
+        $html  .= sprintf( '<input type="text" id="%s" name="lmfwc_settings_general[%s]" value="%s" >',$field,
+            $field, $value );
+        $html .= '<br><br>'; 
+        $html  .= sprintf(
+                    /* translators: %1$s: date format merge code, %2$s: time format merge code, %3$s: general settings URL, %4$s: link to date and time formatting documentation */
+                    __( '<code>%1$s</code> and <code>%2$s</code> will be replaced by formats from <a href="%3$s">Administration > Settings > General</a>. %4$s', 'license-manager-for-woocommerce' ),
+                    '{{DATE_FORMAT}}',
+                    '{{TIME_FORMAT}}',
+                    esc_url( admin_url( 'options-general.php' ) ),
+                    __( '<a href="https://wordpress.org/support/article/formatting-date-and-time/">Documentation on date and time formatting</a>.' )
+                );
+        $html .= '</fieldset>';
+     
 
-        // lmfwc_my_account section fields.
-        add_settings_field(
-            'lmfwc_enable_my_account_endpoint',
-            __('Enable "License keys"', 'license-manager-for-woocommerce'),
-            array($this, 'fieldEnableMyAccountEndpoint'),
-            'lmfwc_my_account',
-            'my_account_section'
-        );
-
-        add_settings_field(
-            'lmfwc_allow_users_to_activate',
-            __('User activation', 'license-manager-for-woocommerce'),
-            array($this, 'fieldAllowUsersToActivate'),
-            'lmfwc_my_account',
-            'my_account_section'
-        );
-
-        add_settings_field(
-            'lmfwc_allow_users_to_deactivate',
-            __('User deactivation', 'license-manager-for-woocommerce'),
-            array($this, 'fieldAllowUsersToDeactivate'),
-            'lmfwc_my_account',
-            'my_account_section'
-        );
+        echo nl2br($html);
     }
+
+    
+    
 
     /**
      * Initializes the "lmfwc_rest_api" section.
@@ -224,38 +176,6 @@ class General
     }
 
     /**
-     * Callback for the "lmfwc_auto_delivery" field.
-     *
-     * @return void
-     */
-    public function fieldAutoDelivery()
-    {
-        $field = 'lmfwc_auto_delivery';
-        (array_key_exists($field, $this->settings)) ? $value = true : $value = false;
-
-        $html = '<fieldset>';
-        $html .= sprintf('<label for="%s">', $field);
-        $html .= sprintf(
-            '<input id="%s" type="checkbox" name="lmfwc_settings_general[%s]" value="1" %s/>',
-            $field,
-            $field,
-            checked(true, $value, false)
-        );
-        $html .= sprintf(
-            '<span>%s</span>',
-            __('Automatically send license keys when an order is set to \'Complete\'.', 'license-manager-for-woocommerce')
-        );
-        $html .= '</label>';
-        $html .= sprintf(
-            '<p class="description">%s</p>',
-            __('If this setting is off, you must manually send out all license keys for completed orders.', 'license-manager-for-woocommerce')
-        );
-        $html .= '</fieldset>';
-
-        echo $html;
-    }
-
-    /**
      * Callback for the "lmfwc_allow_duplicates" field.
      *
      * @return void
@@ -284,143 +204,7 @@ class General
         echo $html;
     }
 
-    /**
-     * Callback for the "lmfwc_enable_stock_manager" field.
-     *
-     * @return void
-     */
-    public function fieldEnableStockManager()
-    {
-        $field = 'lmfwc_enable_stock_manager';
-        (array_key_exists($field, $this->settings)) ? $value = true : $value = false;
-
-        $html = '<fieldset style="margin-bottom: 0;">';
-        $html .= '<label for="' . $field . '">';
-        $html .= sprintf(
-            '<input id="%s" type="checkbox" name="lmfwc_settings_general[%s]" value="1" %s/>',
-            $field,
-            $field,
-            checked(true, $value, false)
-        );
-
-        $html .= '<span>' . __('Enable automatic stock management for WooCommerce products.', 'license-manager-for-woocommerce') . '</span>';
-        $html .= '</label>';
-        $html .= sprintf(
-            '<p class="description">%s<br/>1. %s<br/>2. %s<br/>3. %s</p>',
-            __('To use this feature, you also need to enable the following settings at a product level:', 'license-manager-for-woocommerce'),
-            __('Inventory &rarr; Manage stock?', 'license-manager-for-woocommerce'),
-            __('License Manager &rarr; Sell license keys', 'license-manager-for-woocommerce'),
-            __('License Manager &rarr; Sell from stock', 'license-manager-for-woocommerce')
-        );
-        $html .= '</fieldset>';
-
-        $html .= '
-            <fieldset style="margin-top: 1em;">
-                <button class="button button-secondary"
-                        type="submit"
-                        name="lmfwc_stock_synchronize"
-                        value="1">' . __('Synchronize', 'license-manager-for-woocommerce') . '</button>
-                <p class="description" style="margin-top: 1em;">
-                    ' . __('The "Synchronize" button can be used to manually synchronize the product stock.', 'license-manager-for-woocommerce') . '
-                </p>
-            </fieldset>
-        ';
-
-        echo $html;
-    }
-
-    /**
-     * Callback for the "lmfwc_enable_my_account_endpoint" field.
-     *
-     * @return void
-     */
-    public function fieldEnableMyAccountEndpoint()
-    {
-        $field = 'lmfwc_enable_my_account_endpoint';
-        (array_key_exists($field, $this->settings)) ? $value = true : $value = false;
-
-        $html = '<fieldset>';
-        $html .= sprintf('<label for="%s">', $field);
-        $html .= sprintf(
-            '<input id="%s" type="checkbox" name="lmfwc_settings_general[%s]" value="1" %s/>',
-            $field,
-            $field,
-            checked(true, $value, false)
-        );
-        $html .= sprintf(
-            '<span>%s</span>',
-            __('Display the \'License keys\' section inside WooCommerce\'s \'My Account\'.', 'license-manager-for-woocommerce')
-        );
-        $html .= '</label>';
-        $html .= sprintf(
-            '<p class="description">%s</p>',
-            __('You might need to save your permalinks after enabling this option.', 'license-manager-for-woocommerce')
-        );
-        $html .= '</fieldset>';
-
-        echo $html;
-    }
-
-    /**
-     * Callback for the "lmfwc_allow_users_to_activate" field.
-     */
-    public function fieldAllowUsersToActivate()
-    {
-        $field = 'lmfwc_allow_users_to_activate';
-        (array_key_exists($field, $this->settings)) ? $value = true : $value = false;
-
-        $html = '<fieldset>';
-        $html .= sprintf('<label for="%s">', $field);
-        $html .= sprintf(
-            '<input id="%s" type="checkbox" name="lmfwc_settings_general[%s]" value="1" %s/>',
-            $field,
-            $field,
-            checked(true, $value, false)
-        );
-        $html .= sprintf(
-            '<span>%s</span>',
-            __('Allow users to activate their license keys.', 'license-manager-for-woocommerce')
-        );
-        $html .= '</label>';
-        $html .= sprintf(
-            '<p class="description">%s</p>',
-            __('The option will be visible from the \'License keys\' section inside WooCommerce\'s \'My Account\'', 'license-manager-for-woocommerce')
-        );
-        $html .= '</fieldset>';
-
-        echo $html;
-    }
-
-    /**
-     * Callback for the "lmfwc_allow_users_to_deactivate" field.
-     */
-    public function fieldAllowUsersToDeactivate()
-    {
-        $field = 'lmfwc_allow_users_to_deactivate';
-        (array_key_exists($field, $this->settings)) ? $value = true : $value = false;
-
-        $html = '<fieldset>';
-        $html .= sprintf('<label for="%s">', $field);
-        $html .= sprintf(
-            '<input id="%s" type="checkbox" name="lmfwc_settings_general[%s]" value="1" %s/>',
-            $field,
-            $field,
-            checked(true, $value, false)
-        );
-        $html .= sprintf(
-            '<span>%s</span>',
-            __('Allow users to deactivate their license keys.', 'license-manager-for-woocommerce')
-        );
-        $html .= '</label>';
-        $html .= sprintf(
-            '<p class="description">%s</p>',
-            __('The option will be visible from the \'License keys\' section inside WooCommerce\'s \'My Account\'', 'license-manager-for-woocommerce')
-        );
-        $html .= '</fieldset>';
-
-        echo $html;
-    }
-
+   
     /**
      * Callback for the "lmfwc_disable_api_ssl" field.
      *
@@ -487,53 +271,66 @@ class General
                 'method'     => 'PUT',
                 'deprecated' => false,
             ),
-            array(
+             array(
                 'id'         => '014',
+                'name'       => 'v2/licenses/{license_key}',
+                'method'     => 'DELETE',
+                'deprecated' => false,
+            ),
+            array(
+                'id'         => '015',
                 'name'       => 'v2/licenses/activate/{license_key}',
                 'method'     => 'GET',
                 'deprecated' => false,
             ),
             array(
-                'id'         => '015',
-                'name'       => 'v2/licenses/deactivate/{license_key}',
-                'method'     => 'GET',
-                'deprecated' => false,
-            ),
-            array(
                 'id'         => '016',
-                'name'       => 'v2/licenses/validate/{license_key}',
+                'name'       => 'v2/licenses/deactivate/{activation_token}',
                 'method'     => 'GET',
                 'deprecated' => false,
             ),
             array(
                 'id'         => '017',
-                'name'       => 'v2/generators',
+                'name'       => 'v2/licenses/validate/{license_key}',
                 'method'     => 'GET',
                 'deprecated' => false,
             ),
             array(
                 'id'         => '018',
-                'name'       => 'v2/generators/{id}',
+                'name'       => 'v2/generators',
                 'method'     => 'GET',
                 'deprecated' => false,
             ),
             array(
                 'id'         => '019',
+                'name'       => 'v2/generators/{id}',
+                'method'     => 'GET',
+                'deprecated' => false,
+            ),
+            array(
+                'id'         => '020',
                 'name'       => 'v2/generators',
                 'method'     => 'POST',
                 'deprecated' => false,
             ),
             array(
-                'id'         => '020',
+                'id'         => '021',
                 'name'       => 'v2/generators/{id}',
                 'method'     => 'PUT',
                 'deprecated' => false,
             ),
+             array(
+                'id'         => '022',
+                'name'       => 'v2/generators/{id}',
+                'method'     => 'DELETE',
+                'deprecated' => false,
+            ),
         );
         $classList = array(
-            'GET'  => 'text-success',
-            'PUT'  => 'text-primary',
-            'POST' => 'text-primary'
+            'GET'    => 'text-success',
+            'PUT'    => 'text-primary',
+            'POST'   => 'text-primary',
+            'DELETE' => 'text-danger '
         );
 
         if (array_key_exists($field, $this->settings)) {

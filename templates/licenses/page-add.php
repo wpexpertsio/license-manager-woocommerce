@@ -13,7 +13,7 @@
         <tr scope="row">
             <th scope="row"><label for="single__license_key"><?php esc_html_e('License key', 'license-manager-for-woocommerce');?></label></th>
             <td>
-                <input name="license_key" id="single__license_key" class="regular-text" type="text">
+                <input name="license_key" id="single__license_key" class="regular-text" type="text" required>
                 <p class="description"><?php esc_html_e('The license key will be encrypted before it is stored inside the database.', 'license-manager-for-woocommerce');?></p>
             </td>
         </tr>
@@ -22,7 +22,7 @@
         <tr scope="row">
             <th scope="row"><label for="single__valid_for"><?php esc_html_e('Valid for (days)', 'license-manager-for-woocommerce');?></label></th>
             <td>
-                <input name="valid_for" id="single__valid_for" class="regular-text" type="text">
+                <input name="valid_for" type="number" id="single__valid_for" class="regular-text" type="text">
                 <p class="description"><?php esc_html_e('Number of days for which the license key is valid after purchase. Leave blank if the license key does not expire. Cannot be used at the same time as the "Expires at" field.', 'license-manager-for-woocommerce');?></p>
             </td>
         </tr>

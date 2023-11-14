@@ -39,7 +39,7 @@ class Order
      */
     private function addOrderStatusHooks()
     {
-        $orderStatusSettings = Settings::get('lmfwc_license_key_delivery_options', Settings::SECTION_ORDER_STATUS);
+        $orderStatusSettings = Settings::get('lmfwc_license_key_delivery_options', Settings::SECTION_WOOCOMMERCE);
 
         // The order status settings haven't been configured.
         if (empty($orderStatusSettings)) {
@@ -66,13 +66,14 @@ class Order
      */
     public function generateOrderLicenses($orderId)
     {
+         /** @var WC_Order $order */
+        $order = wc_get_order($orderId);
+
         // Keys have already been generated for this order.
-        if (get_post_meta($orderId, 'lmfwc_order_complete')) {
+        if ( $order->get_meta( 'lmfwc_order_complete')) {
             return;
         }
 
-        /** @var WC_Order $order */
-        $order = wc_get_order($orderId);
 
         // The given order does not exist
         if (!$order) {
@@ -85,12 +86,12 @@ class Order
             $product = $orderItem->get_product();
 
             // Skip this product because it's not a licensed product.
-            if (!get_post_meta($product->get_id(), 'lmfwc_licensed_product', true)) {
+            if (! $product->get_meta( 'lmfwc_licensed_product', true)) {
                 continue;
             }
 
-            $useStock = get_post_meta($product->get_id(), 'lmfwc_licensed_product_use_stock', true);
-            $useGenerator = get_post_meta($product->get_id(), 'lmfwc_licensed_product_use_generator', true);
+            $useStock = $product->get_meta(  'lmfwc_licensed_product_use_stock', true);
+            $useGenerator =$product->get_meta(  'lmfwc_licensed_product_use_generator', true);
 
             // Skip this product because neither selling from stock or from generators is active.
             if (!$useStock && !$useGenerator) {
@@ -98,8 +99,7 @@ class Order
             }
 
             $deliveredQuantity = absint(
-                get_post_meta(
-                    $product->get_id(),
+               $product->get_meta( 
                     'lmfwc_licensed_product_delivered_quantity',
                     true
                 )
@@ -151,8 +151,7 @@ class Order
                     // The "use generator" option is active, generate them
                     if ($useGenerator) {
                         $amountToGenerate = $neededAmount - $availableStock;
-                        $generatorId = get_post_meta(
-                            $product->get_id(),
+                        $generatorId = $product->get_meta( 
                             'lmfwc_licensed_product_assigned_generator',
                             true
                         );
@@ -180,8 +179,7 @@ class Order
 
             // Sell license keys through the active generator
             else if (!$useStock && $useGenerator) {
-                $generatorId = get_post_meta(
-                    $product->get_id(),
+                $generatorId = $product->get_meta( 
                     'lmfwc_licensed_product_assigned_generator',
                     true
                 );
@@ -209,10 +207,10 @@ class Order
             }
 
             // Set the order as complete.
-            update_post_meta($orderId, 'lmfwc_order_complete', 1);
-
+            $order->update_meta_data( 'lmfwc_order_complete', 1);
+            $order->save();
             // Set status to delivered if the setting is on.
-            if (Settings::get('lmfwc_auto_delivery')) {
+            if (Settings::get('lmfwc_auto_delivery' , Settings::SECTION_WOOCOMMERCE)) {
                 LicenseResourceRepository::instance()->updateBy(
                     array('order_id' => $orderId),
                     array('status' => LicenseStatus::DELIVERED)
@@ -255,7 +253,7 @@ class Order
     {
         // Return if the order isn't complete.
         if ($order->get_status() != 'completed'
-            && !get_post_meta($order->get_id(), 'lmfwc_order_complete')
+            && ! $order->get_meta( 'lmfwc_order_complete')
         ) {
             return;
         }
@@ -278,7 +276,7 @@ class Order
                 'heading'       => apply_filters('lmfwc_license_keys_table_heading', null),
                 'valid_until'   => apply_filters('lmfwc_license_keys_table_valid_until', null),
                 'data'          => $data,
-                'date_format'   => get_option('date_format'),
+                'date_format'   => lmfwc_expiration_format(),
                 'args'          => apply_filters('lmfwc_template_args_myaccount_license_keys', array())
             ),
             '',

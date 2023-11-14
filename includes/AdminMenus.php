@@ -6,6 +6,7 @@ use LicenseManagerForWooCommerce\Enums\LicenseStatus;
 use LicenseManagerForWooCommerce\Lists\APIKeyList;
 use LicenseManagerForWooCommerce\Lists\GeneratorsList;
 use LicenseManagerForWooCommerce\Lists\LicensesList;
+use LicenseManagerForWooCommerce\Lists\ActivationsList;
 use LicenseManagerForWooCommerce\Models\Resources\ApiKey as ApiKeyResourceModel;
 use LicenseManagerForWooCommerce\Models\Resources\License as LicenseResourceModel;
 use LicenseManagerForWooCommerce\Repositories\Resources\ApiKey as ApiKeyResourceRepository;
@@ -40,6 +41,11 @@ class AdminMenus
      */
     const GENERATORS_PAGE = 'lmfwc_generators';
 
+     /**
+     * Generators page slug.
+     */
+    const ACTIVATIONS_PAGE = 'lmfwc_activations';
+
     /**
      * Settings page slug.
      */
@@ -61,11 +67,16 @@ class AdminMenus
     private $generators;
 
     /**
+     * @var ActivationsList
+     */
+    private $activations;
+
+    /**
      * Class constructor.
      */
     public function __construct()
     {
-        $this->tabWhitelist = array('general', 'order_status', 'rest_api', 'tools');
+        $this->tabWhitelist = array('general', 'woocommerce', 'rest_api', 'tools');
 
         // Plugin pages.
         add_action('admin_menu', array($this, 'createPluginPages'), 10);
@@ -111,17 +122,6 @@ class AdminMenus
      */
     public function createPluginPages()
     {
-        // Licenses List Page
-        // add_menu_page(
-        //     __('License Manager', 'license-manager-for-woocommerce'),
-        //     __('License Manager', 'license-manager-for-woocommerce'),
-        //     'manage_options',
-        //     self::LICENSES_PAGE,
-        //     array($this, 'licensesPage'),
-        //     'dashicons-lock',
-        //     10
-        // );
-        // $licensesHook = add_submenu_page( 'woocommerce', 'License Keys', 'License Keys', 'manage_options', 'lmfwc_licenses', array($this, 'licensesPage'), 9999 );
 
         $licensesHook = add_submenu_page(
             self::WOOCOMMERCE_PAGE,
@@ -144,15 +144,15 @@ class AdminMenus
         );
         add_action('load-' . $generatorsHook, array($this, 'generatorsPageScreenOptions'));
 
-        // Settings Page
-        // add_submenu_page(
-        //     self::WOOCOMMERCE_PAGE,
-        //     __('Settings', 'license-manager-for-woocommerce'),
-        //     __('Settings', 'license-manager-for-woocommerce'),
-        //     'manage_options',
-        //     self::SETTINGS_PAGE,
-        //     array($this, 'settingsPage')
-        // );
+        $activationsHook = add_submenu_page(
+            self::WOOCOMMERCE_PAGE,
+            __('Activations', 'license-manager-for-woocommerce'),
+            __('Activations', 'license-manager-for-woocommerce'),
+            'manage_options',
+            self::ACTIVATIONS_PAGE,
+            array($this, 'activationsPage')
+        );
+        add_action('load-' . $activationsHook, array($this, 'activationsPageScreenOptions'));
     }
 
     /**
@@ -187,6 +187,34 @@ class AdminMenus
         add_screen_option($option, $args);
 
         $this->generators = new GeneratorsList;
+    }
+
+    /**
+     * Set up the activations page
+     */
+    public function activationsPage() {
+
+        $activations = $this->activations;
+        $action      = $this->getCurrentAction( $default = 'list' );
+
+        include LMFWC_TEMPLATES_DIR . 'page-activations.php';
+    }
+
+    /**
+     * Adds the supported screen options for the generators list.
+     */
+    public function activationsPageScreenOptions()
+    {
+        $option = 'per_page';
+        $args = array(
+            'label'   => __('Activations per page', 'license-manager-for-woocommerce'),
+            'default' => 10,
+            'option'  => 'activations_per_page'
+        );
+
+        add_screen_option($option, $args);
+
+        $this->activations = new ActivationsList;
     }
 
     /**
@@ -308,14 +336,13 @@ class AdminMenus
      */
     public function settingsPage()
     {
-        $tab            = $this->getCurrentTab();
-        $section        = $this->getCurrentSection();
+        $section            = $this->getCurrentSection();
         $urlGeneral     = admin_url( sprintf( 'admin.php?page=%s&tab=%2s&section=general',      self::WC_SETTINGS_PAGE, self::SETTINGS_PAGE ) );
-        $urlOrderStatus = admin_url( sprintf( 'admin.php?page=%s&tab=%2s&section=order_status', self::WC_SETTINGS_PAGE, self::SETTINGS_PAGE ) );
+        $urlWooCommerce = admin_url( sprintf( 'admin.php?page=%s&tab=%2s&section=woocommerce', self::WC_SETTINGS_PAGE, self::SETTINGS_PAGE ) );
         $urlRestApi     = admin_url( sprintf( 'admin.php?page=%s&tab=%2s&section=rest_api',     self::WC_SETTINGS_PAGE, self::SETTINGS_PAGE ) );
         $urlTools       = admin_url( sprintf( 'admin.php?page=%s&tab=%2s&section=tools',        self::WC_SETTINGS_PAGE, self::SETTINGS_PAGE ) );
 
-        if ($tab == 'rest_api') {
+        if ($section == 'rest_api') {
             if (isset($_GET['create_key'])) {
                 $action = 'create';
             } elseif (isset($_GET['edit_key'])) {
@@ -338,15 +365,22 @@ class AdminMenus
                         $keyId = absint($_GET['edit_key']);
                     }
 
-                    if ($keyId !== 0) {
+                if ($keyId !== 0) {
                         /** @var ApiKeyResourceModel $keyData */
                         $keyData = ApiKeyResourceRepository::instance()->find($keyId);
-                        $userId  = (int)$keyData->getUserId();
-                        $date = sprintf(
-                            esc_html__('%1$s at %2$s', 'license-manager-for-woocommerce'),
-                            date_i18n(wc_date_format(), strtotime($keyData->getLastAccess())),
-                            date_i18n(wc_time_format(), strtotime($keyData->getLastAccess()))
-                        );
+
+                        if ($keyData !== null) {
+                            $userId  = (int)$keyData->getUserId();
+
+                            $lastAccess = $keyData->getLastAccess();
+                            if ($lastAccess !== null) {
+                                $date = sprintf(
+                                    esc_html__('%1$s at %2$s', 'license-manager-for-woocommerce'),
+                                    date_i18n(wc_date_format(), strtotime($lastAccess)),
+                                    date_i18n(wc_time_format(), strtotime($lastAccess))
+                                );
+                            } 
+                        } 
                     }
 
                     $users       = apply_filters('lmfwc_get_users', null);
@@ -447,25 +481,15 @@ class AdminMenus
      *
      * @return string
      */
-    protected function getCurrentTab()
-    {
-        $tab = 'general';
-
-        if (isset($_GET['section']) && in_array($_GET['section'], $this->tabWhitelist)) {
-            $tab = sanitize_text_field($_GET['section']);
-        }
-
-        return $tab;
-    }
-
-    /**
-     * Retrieves the currently active section (currently not used).
-     *
-     * @return string
-     */
     protected function getCurrentSection()
     {
-        return '';
+        $section = 'general';
+
+        if (isset($_GET['section']) && in_array($_GET['section'], $this->tabWhitelist)) {
+            $section = sanitize_text_field($_GET['section']);
+        }
+
+        return $section;
     }
 
     /**

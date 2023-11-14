@@ -35,6 +35,13 @@ abstract class LicenseSource
     const API = 3;
 
     /**
+     * Enumerator value used for the MIGRATION.
+     *
+     * @var int
+     */
+    const MIGRATION = 4;
+
+    /**
      * Available enumerator values.
      *
      * @var array
@@ -42,7 +49,8 @@ abstract class LicenseSource
     public static $sources = array(
         self::GENERATOR,
         self::IMPORT,
-        self::API
+        self::API,
+        self::MIGRATION
     );
 
     /**
@@ -57,7 +65,8 @@ abstract class LicenseSource
         $labels = array(
             self::GENERATOR => 'GENERATOR',
             self::IMPORT    => 'IMPORT',
-            self::API       => 'API'
+            self::API       => 'API',
+            self::MIGRATION => 'MIGRATION'
         );
 
         return $labels[$source];

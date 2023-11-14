@@ -1,6 +1,6 @@
 <?php
 
-namespace LicenseManagerForWooCommerce\API;
+namespace LicenseManagerForWooCommerce\Api;
 
 use LicenseManagerForWooCommerce\Settings;
 use stdClass;

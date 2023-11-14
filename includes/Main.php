@@ -13,9 +13,13 @@
 namespace LicenseManagerForWooCommerce;
 
 use LicenseManagerForWooCommerce\Abstracts\Singleton;
+use LicenseManagerForWooCommerce\Integrations\WooCommerce\Controller;
 use LicenseManagerForWooCommerce\Controllers\ApiKey as ApiKeyController;
 use LicenseManagerForWooCommerce\Controllers\Generator as GeneratorController;
 use LicenseManagerForWooCommerce\Controllers\License as LicenseController;
+use LicenseManagerForWooCommerce\Controllers\Dropdowns as DropdownsController;
+
+
 use LicenseManagerForWooCommerce\Enums\LicenseStatus;
 
 defined('ABSPATH') || exit;
@@ -41,10 +45,10 @@ final class Main extends Singleton
     {
         $this->_defineConstants();
         $this->_initHooks();
-
+        
         add_action('init', array($this, 'init'));
 
-        new API\Authentication();
+        new Api\Authentication();
     }
 
     /**
@@ -126,13 +130,11 @@ final class Main extends Singleton
             $extra_css = 'p.submit:not(.wrap.lmfwc p.submit){display:none;}';
             wp_add_inline_style('lmfwc_admin_css', $extra_css);
         }
-        if ($hook === 'woocommerce_page_lmfwc_licenses'
-            || $hook === 'woocommerce_page_lmfwc_generators'
-            || ( $hook === 'woocommerce_page_wc-settings' && isset( $_GET['tab'] ) && $_GET['tab'] === 'lmfwc_settings' )
-        ) {
+        if ($hook === 'woocommerce_page_lmfwc_licenses' || $hook === 'woocommerce_page_lmfwc_generators' || $hook === 'woocommerce_page_lmfwc_activations' || ( $hook === 'woocommerce_page_wc-settings' && isset( $_GET['tab'] ) && $_GET['tab'] === 'lmfwc_settings' ) ) {
             wp_enqueue_script('lmfwc_select2_cdn');
             wp_enqueue_style('lmfwc_select2_cdn');
             wp_enqueue_style('lmfwc_select2');
+             wp_enqueue_script('select2');
         }
 
         // Licenses page
@@ -180,10 +182,47 @@ final class Main extends Singleton
             );
         }
 
+
+        // Activations page
+        if ($hook === 'woocommerce_page_lmfwc_activations') {
+            wp_enqueue_script('lmfwc_activations_page_js', LMFWC_JS_URL . 'activations_page.js');
+
+            wp_localize_script(
+                'lmfwc_activations_page_js',
+                'i18n',
+                array(
+                    'placeholderSearchLicenses' => __( 'Search by license ID', 'license-manager-for-woocommerce' ),
+                    'placeholderSearchSources'  => __( 'Search by source', 'license-manager-for-woocommerce' ),
+                )
+            );
+
+            wp_localize_script(
+                'lmfwc_activations_page_js',
+                'security',
+                array(
+                    'dropdownSearch' => wp_create_nonce('lmfwc_dropdown_search')
+                )
+            );
+        }
+
         // Settings page
         if ( $hook === 'woocommerce_page_wc-settings' && isset( $_GET['tab'] ) && $_GET['tab'] === 'lmfwc_settings' ) {
+            wp_enqueue_media();
+            wp_enqueue_script('lmfwc_select2_cdn');
+            wp_enqueue_style('lmfwc_select2_cdn');
+            wp_enqueue_script('select2');
             wp_enqueue_script('lmfwc_settings_page_js', LMFWC_JS_URL . 'settings_page.js');
+
         }
+
+        wp_localize_script(
+                'lmfwc_settings_page_js',
+                'security',
+                array(
+                    'dropdownSearch' => wp_create_nonce('lmfwc_dropdown_search'),
+                    'ajaxurl' => admin_url('admin-ajax.php')
+                )
+            );
 
         // Script localization
         wp_localize_script(
@@ -262,6 +301,7 @@ final class Main extends Singleton
      */
     public function init()
     {
+        
         Setup::migrate();
 
         $this->publicHooks();
@@ -276,8 +316,9 @@ final class Main extends Singleton
         new Repositories\Users();
         new LicenseController();
         new GeneratorController();
+        new DropdownsController();
         new ApiKeyController();
-        new API\Setup();
+        new Api\Setup();
 
         if ($this->isPluginActive('woocommerce/woocommerce.php')) {
             new Integrations\WooCommerce\Controller();

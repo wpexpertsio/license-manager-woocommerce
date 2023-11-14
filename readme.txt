@@ -2,8 +2,8 @@
 Contributors: wpexpertsio
 Tags: license key, license, key, software license, serial key, manager, woocommerce, wordpress
 Requires at least: 4.7
-Tested up to: 6.2.2
-Stable tag: 2.2.10
+Tested up to: 6.4
+Stable tag: 3.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -16,6 +16,12 @@ The **License Manager for WooCommerce** allows you to easily sell and manage all
 
 #### Key features
 
+* Display the license keys section inside WooCommerce ‘s My Account Page
+* Allow users to activate/deactivate their license keys
+* Allow users to download license certificates 
+* Admins can add a company logo on a license certificate
+* Admins can do a one-click migration of the License Key from the Digital License Manager
+* Admin can generate licenses for all past orders
 * Automatically sell and deliver license keys through WooCommerce.
 * Automatically manage the stock for licensed products.
 * Activate, deactivate, and check your licenses through the REST API.
@@ -114,6 +120,20 @@ Of course! The plugin comes with REST API routes which allow you to activate, de
 [See changelog for all versions](https://raw.githubusercontent.com/wpexpertsio/license-manager-woocommerce/main/CHANGELOG.md).
 
 == Upgrade Notice ==
+
+= 3.0 =
+Tested up to WooCommerce v8.2 and WordPress v6.4
+Added - License Activations
+Added - License and Generator delete endpoints
+Added - License PDF Certificates 
+Added - Migration and Past Order License Generator tools
+Added - License Expiration Format
+Added - Single License Page in My account
+Fixed - UserId variable in lmfwc_add_license function
+Fixed - OrderBy query Vulnerability 
+
+= 2.2.11 =
+* Improvement - Clean up the SQL query to make it secure.
 
 = 2.2.10 =
 The reported vulnerability has been resolved by updating the Feedback SDK to the latest version.

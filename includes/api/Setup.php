@@ -1,6 +1,6 @@
 <?php
 
-namespace LicenseManagerForWooCommerce\API;
+namespace LicenseManagerForWooCommerce\Api;
 
 defined('ABSPATH') || exit;
 
@@ -30,13 +30,13 @@ class Setup
     {
         $controllers = array(
             // REST API v2 controllers.
-            '\LicenseManagerForWooCommerce\API\v2\Licenses',
-            '\LicenseManagerForWooCommerce\API\v2\Generators'
+            '\LicenseManagerForWooCommerce\Api\V2\Licenses',
+            '\LicenseManagerForWooCommerce\Api\V2\Generators'
         );
 
         foreach ($controllers as $controller) {
-            $this->$controller = new $controller();
-            $this->$controller->register_routes();
+            $controller = new $controller();
+            $controller->register_routes();
         }
     }
 

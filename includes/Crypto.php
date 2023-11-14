@@ -62,6 +62,8 @@ class Crypto
         add_filter('lmfwc_encrypt', array($this, 'encrypt'), 10, 1);
         add_filter('lmfwc_decrypt', array($this, 'decrypt'), 10, 1);
         add_filter('lmfwc_hash',    array($this, 'hash'),    10, 1);
+        add_filter('lmfwc_activation_hash',    array($this, 'activationHash'),    10, 1);
+
     }
 
     /**
@@ -163,4 +165,9 @@ class Crypto
     {
         return hash_hmac('sha256', $value, $this->keySecret);
     }
+
+    public function activationHash( $license_key ) {
+        return sha1( sprintf( '%s%s%s%s', $license_key, lmfwc_rand_hash(), mt_rand( 10000, 1000000 ), lmfwc_clientIp() ) );
+    }
+
 }

@@ -21,6 +21,11 @@ class Setup
      */
     const GENERATORS_TABLE_NAME = 'lmfwc_generators';
 
+     /**
+     * @var string
+     */
+    const ACTIVATIONS_TABLE_NAME = 'lmfwc_activations';
+
     /**
      * @var string
      */
@@ -44,12 +49,14 @@ class Setup
      */
     public static function install()
     {
+        flush_rewrite_rules();
         self::checkRequirements();
         self::createTables();
+        self::backwardSupport();
         self::setDefaultFilesAndFolders();
         self::setDefaultSettings();
 
-        flush_rewrite_rules();
+        
     }
 
     /**
@@ -57,7 +64,21 @@ class Setup
      */
     public static function deactivate()
     {
+        flush_rewrite_rules();
         // Nothing for now...
+    }
+    public static function backwardSupport() {
+        global $wpdb;
+        $lmfwc_table_check = get_option('lmfwc_table_check');
+        if ( !$lmfwc_table_check ) {
+            $table1  = $wpdb->prefix . self::LICENSES_TABLE_NAME;
+            $table2  = $wpdb->prefix . self::GENERATORS_TABLE_NAME;
+            $table3  = $wpdb->prefix . self::API_KEYS_TABLE_NAME;
+            $wpdb->query("ALTER TABLE `{$table1}` RENAME COLUMN `activations_limit` TO `times_activated_max`;");
+            $wpdb->query("ALTER TABLE `{$table2}` RENAME COLUMN `activations_limit` TO `times_activated_max`;");
+            $wpdb->query("ALTER TABLE `{$table3}` DROP COLUMN `endpoints`;");
+            update_option('lmfwc_table_check', true);
+        }
     }
 
     /**
@@ -71,7 +92,8 @@ class Setup
             $wpdb->prefix . self::LICENSES_TABLE_NAME,
             $wpdb->prefix . self::GENERATORS_TABLE_NAME,
             $wpdb->prefix . self::API_KEYS_TABLE_NAME,
-            $wpdb->prefix . self::LICENSE_META_TABLE_NAME
+            $wpdb->prefix . self::LICENSE_META_TABLE_NAME,
+            $wpdb->prefix . self::ACTIVATIONS_TABLE_NAME
         );
 
         foreach ($tables as $table) {
@@ -79,7 +101,7 @@ class Setup
         }
 
         delete_option('lmfwc_settings_general');
-        delete_option('lmfwc_settings_order_status');
+        delete_option('lmfwc_settings_woocommerce');
         delete_option('lmfwc_settings_tools');
         delete_option('lmfwc_db_version');
     }
@@ -127,6 +149,7 @@ class Setup
         $table2 = $wpdb->prefix . self::GENERATORS_TABLE_NAME;
         $table3 = $wpdb->prefix . self::API_KEYS_TABLE_NAME;
         $table4 = $wpdb->prefix . self::LICENSE_META_TABLE_NAME;
+        $table5 = $wpdb->prefix . self::ACTIVATIONS_TABLE_NAME;
 
         dbDelta("
             CREATE TABLE IF NOT EXISTS $table1 (
@@ -204,6 +227,23 @@ class Setup
                 PRIMARY KEY (`meta_id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8
         ");
+
+         dbDelta( "
+            CREATE TABLE IF NOT EXISTS $table5 (
+                `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+                `token` LONGTEXT NOT NULL COMMENT 'Public identifier',
+                `license_id` BIGINT(20) UNSIGNED NOT NULL,
+                `label` VARCHAR(255) NULL DEFAULT NULL,
+                `source` VARCHAR(255) NOT NULL,
+                `ip_address` VARCHAR(255) NULL DEFAULT NULL,
+                `user_agent` TEXT NULL DEFAULT NULL,
+                `meta_data` LONGTEXT NULL DEFAULT NULL,
+                `created_at` DATETIME NULL DEFAULT NULL,
+                `updated_at` DATETIME NULL DEFAULT NULL,
+                `deactivated_at` DATETIME NULL DEFAULT NULL,
+                PRIMARY KEY (`id`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+            " );
     }
 
     /**
@@ -307,8 +347,8 @@ class Setup
     public static function setDefaultSettings()
     {
         $defaultSettingsGeneral = array(
+            'lmfwc_expire_format' => '{{DATE_FORMAT}} {{TIME_FORMAT}} T',
             'lmfwc_hide_license_keys' => 0,
-            'lmfwc_auto_delivery' => 1,
             'lmfwc_disable_api_ssl' => 0,
             'lmfwc_enabled_api_routes' => array(
                 '000' => '1',
@@ -331,15 +371,21 @@ class Setup
                 '017' => '1',
                 '018' => '1',
                 '019' => '1',
-                '020' => '1'
+                '020' => '1',
+                '021' => '1',
+                '022' => '1'
+
             )
         );
-        $defaultSettingsOrderStatus = array(
+        $defaultSettingsWooCommerce = array(
             'lmfwc_license_key_delivery_options' => array(
                 'wc-completed' => array(
                     'send' => '1'
                 )
-            )
+            ),
+            'lmfwc_auto_delivery' => 1,
+            'lmfwc_enable_my_account_endpoint' => 1
+            
         );
         $defaultSettingsTools = array(
             'lmfwc_csv_export_columns' => array(
@@ -362,7 +408,7 @@ class Setup
 
         // The defaults for the Setting API.
         update_option('lmfwc_settings_general', $defaultSettingsGeneral);
-        update_option('lmfwc_settings_order_status', $defaultSettingsOrderStatus);
+        update_option('lmfwc_settings_woocommerce', $defaultSettingsWooCommerce);
         update_option('lmfwc_settings_tools', $defaultSettingsTools);
         update_option('lmfwc_db_version', self::DB_VERSION);
     }

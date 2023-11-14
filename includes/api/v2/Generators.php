@@ -1,6 +1,6 @@
 <?php
 
-namespace LicenseManagerForWooCommerce\API\v2;
+namespace LicenseManagerForWooCommerce\Api\V2;
 
 use Exception;
 use LicenseManagerForWooCommerce\Abstracts\RestController as LMFWC_REST_Controller;
@@ -114,6 +114,27 @@ class Generators extends LMFWC_REST_Controller
                 )
             )
         );
+
+        /**
+         * DELETE generators/{id}
+         *
+         * Updates an already existing generator in the database
+         */
+        register_rest_route(
+            $this->namespace, $this->rest_base . '/(?P<generator_id>[\w-]+)', array(
+                array(
+                    'methods'             => WP_REST_Server::DELETABLE,
+                    'callback'            => array( $this, 'deleteGenerator' ),
+                    'permission_callback' => array( $this, 'permissionCallback' ),
+                    'args'                => array(
+                        'generator_id' => array(
+                            'description' => 'Generator ID',
+                            'type'        => 'integer',
+                        ),
+                    ),
+                )
+            )
+        );
     }
 
     /**
@@ -123,7 +144,7 @@ class Generators extends LMFWC_REST_Controller
      */
     public function getGenerators()
     {
-        if (!$this->isRouteEnabled($this->settings, '017')) {
+        if (!$this->isRouteEnabled($this->settings, '018')) {
             return $this->routeDisabledError();
         }
 
@@ -176,7 +197,7 @@ class Generators extends LMFWC_REST_Controller
      */
     public function getGenerator(WP_REST_Request $request)
     {
-        if (!$this->isRouteEnabled($this->settings, '018')) {
+        if (!$this->isRouteEnabled($this->settings, '019')) {
             return $this->routeDisabledError();
         }
 
@@ -234,7 +255,7 @@ class Generators extends LMFWC_REST_Controller
      */
     public function createGenerator(WP_REST_Request $request)
     {
-        if (!$this->isRouteEnabled($this->settings, '019')) {
+        if (!$this->isRouteEnabled($this->settings, '020')) {
             return $this->routeDisabledError();
         }
 
@@ -335,9 +356,10 @@ class Generators extends LMFWC_REST_Controller
      */
     public function updateGenerator(WP_REST_Request $request)
     {
-        if (!$this->isRouteEnabled($this->settings, '020')) {
+           if (!$this->isRouteEnabled($this->settings, '021')) {
             return $this->routeDisabledError();
         }
+
 
         if (!$this->permissionCheck('generator', 'edit')) {
             return new WP_Error(
@@ -435,4 +457,41 @@ class Generators extends LMFWC_REST_Controller
 
         return $this->response(true, $updatedGenerator->toArray(), 200, 'v2/generators/{id}');
     }
+
+    /**
+     * Callback for the DELETE generators/{id} route. Deletes an existing generator in the database.
+     *
+     * @param WP_REST_Request $request
+     *
+     * @return WP_REST_Response|WP_Error
+     */
+       public function deleteGenerator( WP_REST_Request $request ) {
+
+        if (!$this->isRouteEnabled($this->settings, '022')) {
+            return $this->routeDisabledError();
+        }
+
+     
+
+      $urlParams = $request->get_url_params();
+        $generator_id = isset( $urlParams['generator_id'] ) ? sanitize_text_field( $urlParams['generator_id'] ) : '';
+
+        $generator = GeneratorResourceRepository::instance()->delete($generator_id);
+
+         if (!$generator) {
+            return new WP_Error(
+                'lmfwc_rest_data_error',
+                'The generator key could not be found or deleted.',
+                array('status' => 404)
+            );
+        }
+        return $this->response( true, [], 200, 'v2/generators/{id}' );
+
+
+        
+    }
+
+
+
+
 }

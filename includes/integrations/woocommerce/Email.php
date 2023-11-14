@@ -33,7 +33,7 @@ class Email
     {
         // Return if the order isn't complete.
         if ($order->get_status() !== 'completed'
-            && !get_post_meta($order->get_id(), 'lmfwc_order_complete')
+            && !$order->get_meta( 'lmfwc_order_complete')
         ) {
             return;
         }
@@ -42,7 +42,7 @@ class Email
             return;
         }
 
-        if (Settings::get('lmfwc_auto_delivery')) {
+        if (Settings::get('lmfwc_auto_delivery' , Settings::SECTION_WOOCOMMERCE)) {
             // Send the keys out if the setting is active.
             if ($plainText) {
                 echo wc_get_template(
@@ -107,7 +107,6 @@ class Email
                 );
             }
 
-            include LMFWC_TEMPLATES_DIR . '';
         }
     }
 

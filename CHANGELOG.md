@@ -1,5 +1,4 @@
-##### 3.0 - 2023-09-15
-Tested up to WooCommerce v8.0.3 and WordPress v6.3.1
+##### 3.0 - 2023-11-14
 Added - License Activations
 Added - License and Generator delete endpoints
 Added - License PDF Certificates 

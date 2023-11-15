@@ -1,3 +1,6 @@
+##### 3.0.1 - 2023-11-15
+- Fixed - Through Php errors in some cases
+
 ##### 3.0 - 2023-11-14
 Added - License Activations
 Added - License and Generator delete endpoints

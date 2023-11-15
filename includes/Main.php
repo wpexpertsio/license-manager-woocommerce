@@ -79,7 +79,6 @@ final class Main extends Singleton
         define('LMFWC_JS_URL',     LMFWC_ASSETS_URL . 'js/');
         define('LMFWC_IMG_URL',    LMFWC_ASSETS_URL . 'img/');
     }
-
     /**
      * Include JS and CSS files.
      *

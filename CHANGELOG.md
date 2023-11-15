@@ -1,3 +1,6 @@
+##### 3.0.2 - 2023-11-15
+- Fixed - License not activating via API
+
 ##### 3.0.1 - 2023-11-15
 - Fixed - Through Php errors in some cases
 

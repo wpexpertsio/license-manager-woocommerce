@@ -328,6 +328,7 @@ class Licenses extends LMFWC_REST_Controller
                         'license_id' => $license->getId()
                     )
                 );
+                $activation = array();
                 foreach( $activations as $activation_data){
                     $activation[] = $activation_data->toArray();
                 }

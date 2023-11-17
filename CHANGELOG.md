@@ -1,3 +1,6 @@
+##### 3.0.3 - 2023-11-18
+- Fixed - Php warnings appears in some cases.
+
 ##### 3.0.2 - 2023-11-15
 - Fixed - License not activating via API
 
@@ -15,7 +18,7 @@ Fixed - UserId variable in lmfwc_add_license function
 Fixed - OrderBy query Vulnerability 
 
 ##### 2.2.11 - 2023-09-13
-* Fix - OrderBy Queryy Vulnerability 
+* Fix - OrderBy Query Vulnerability 
 
 ##### 2.2.10 - 2023-08-01
 * Fix - The reported vulnerability has been resolved by updating the Feedback SDK to the latest version.

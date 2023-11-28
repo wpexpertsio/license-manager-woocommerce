@@ -25,7 +25,9 @@ use LicenseManagerForWooCommerce\Integrations\WooCommerce\Controller;
 
 defined('ABSPATH') || exit; ?>
 
-<?php if ( ! empty( $licenseKeys ) ): ?>
+<?php 
+
+if ( ! empty( $licenseKeys ) ): ?>
 
 <h2><?php _e('Your license keys', 'license-manager-for-woocommerce'); ?></h2>
 
@@ -81,7 +83,7 @@ defined('ABSPATH') || exit; ?>
              </td>
              <td class="license-key-actions">
                  
-               <a href="<?php echo esc_url(esc_url( Controller::getAccountLicenseUrl( $license->getId() ) )); ?>" class="button view"><?php _e('View', 'license-manager-for-woocommerce');?></a>
+               <a href="<?php echo esc_url( Controller::getAccountLicenseUrl( $license->getId() ) ); ?>" class="button view"><?php _e('View', 'license-manager-for-woocommerce');?></a>
 
                <a href="<?php echo esc_url($order->get_view_order_url()); ?>" class="button view"><?php _e('Order', 'license-manager-for-woocommerce');?></a>
            </td>

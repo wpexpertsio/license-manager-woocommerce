@@ -11,7 +11,7 @@ use LicenseManagerForWooCommerce\Enums\LicenseStatus;
 use LicenseManagerForWooCommerce\Models\Resources\License as LicenseResourceModel;
 use LicenseManagerForWooCommerce\Repositories\Resources\License as LicenseResourceRepository;
 use LicenseManagerForWooCommerce\Repositories\Resources\LicenseActivations as ActivationsResourceRepository;
-use LicenseManagerForWooCommerce\Enums\ActivationSource ;
+use LicenseManagerForWooCommerce\Enums\ActivationProcessor;
 
 use WP_Error;
 use WP_REST_Request;
@@ -328,6 +328,7 @@ class Licenses extends LMFWC_REST_Controller
                         'license_id' => $license->getId()
                     )
                 );
+                $activation = array();
                 foreach( $activations as $activation_data){
                     $activation[] = $activation_data->toArray();
                 }

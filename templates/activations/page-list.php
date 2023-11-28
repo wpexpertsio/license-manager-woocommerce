@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * Some of the code written, maintained by Darko Gjorgjijoski
+ */
 use LicenseManagerForWooCommerce\Lists\ActivationsList;
 
 defined( 'ABSPATH' ) || exit;

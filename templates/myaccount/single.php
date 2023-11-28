@@ -20,6 +20,8 @@
  * @var string $date_format
  * @var string $license_key
  * @var stdClass $message
+ * 
+ * Some of the code written, maintained by Darko Gjorgjijoski
  */
 
 use LicenseManagerForWooCommerce\Models\Resources\License;

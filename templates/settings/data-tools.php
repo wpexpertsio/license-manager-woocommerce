@@ -1,4 +1,8 @@
-
+<?php 
+/**
+ * Some of the code written, maintained by Darko Gjorgjijoski
+ */
+?>
 <h3><?php _e( 'Database Migration', 'license-manager-for-woocommerce' ); ?></h3>
 <p><?php _e( 'This is one-click migration tool that makes it possible to migrate from other plugins easily. Please take database backups before starting this operation.', 'license-manager-for-woocommerce' ); ?></p>
 <form class="lmfwc-tool-form" id="lmfwc-migrate-tool" method="POST">

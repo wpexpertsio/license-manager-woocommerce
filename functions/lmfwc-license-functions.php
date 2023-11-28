@@ -10,7 +10,7 @@ use LicenseManagerForWooCommerce\Enums\LicenseStatus as LicenseStatusEnum;
 use LicenseManagerForWooCommerce\Models\Resources\License as LicenseResourceModel;
 use LicenseManagerForWooCommerce\Repositories\Resources\License as LicenseResourceRepository;
 use LicenseManagerForWooCommerce\Repositories\Resources\LicenseActivations as ActivationResourceRepository;
-use LicenseManagerForWooCommerce\Enums\ActivationSource ;
+use LicenseManagerForWooCommerce\Enums\ActivationProcessor;
 
 defined('ABSPATH') || exit;
 
@@ -436,7 +436,7 @@ function lmfwc_activate_license($licenseKey, $args)
         $activationParams = array(
             'license_id' => $license->getId(),
             'token'      => $newToken,
-            'source'     => isset($args['source']) ? $args['source'] : ActivationSource::API,
+            'source'     => isset($args['source']) ? $args['source'] : ActivationProcessor::API,
             'ip_address' => lmfwc_clientIp(),
             'user_agent' => lmfwc_userAgent()
         );

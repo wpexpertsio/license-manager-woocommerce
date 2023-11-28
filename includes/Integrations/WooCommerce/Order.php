@@ -29,7 +29,7 @@ class Order
 
         add_action('woocommerce_order_action_lmfwc_send_license_keys', array($this, 'processSendLicenseKeysAction'), 10, 1);
         add_action('woocommerce_order_details_after_order_table',      array($this, 'showBoughtLicenses'),           10, 1);
-        add_filter('woocommerce_order_actions',                        array($this, 'addSendLicenseKeysAction'),     10, 1);
+        add_filter('woocommerce_order_actions',                        array($this, 'addSendLicenseKeysAction'),     10, 2);
         add_action('woocommerce_after_order_itemmeta',                 array($this, 'showOrderedLicenses'),          10, 3);
     }
 
@@ -292,16 +292,17 @@ class Order
      *
      * @return array
      */
-    public function addSendLicenseKeysAction($actions)
+    public function addSendLicenseKeysAction($actions, $order)
     {
         global $post;
 
-        if (!empty(LicenseResourceRepository::instance()->findAllBy(array('order_id' => $post->ID)))) {
+        if (!empty(LicenseResourceRepository::instance()->findAllBy(array('order_id' => $order->get_id())))) {
             $actions['lmfwc_send_license_keys'] = __('Send license key(s) to customer', 'license-manager-for-woocommerce');
         }
 
         return $actions;
     }
+
 
     /**
      * Hook into the WordPress Order Item Meta Box and display the license key(s).

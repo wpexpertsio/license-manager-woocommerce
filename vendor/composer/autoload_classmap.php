@@ -142,7 +142,7 @@ return array(
     'LicenseManagerForWooCommerce\\Controllers\\Generator' => $baseDir . '/includes/Controllers/Generator.php',
     'LicenseManagerForWooCommerce\\Controllers\\License' => $baseDir . '/includes/Controllers/License.php',
     'LicenseManagerForWooCommerce\\Crypto' => $baseDir . '/includes/Crypto.php',
-    'LicenseManagerForWooCommerce\\Enums\\ActivationSource' => $baseDir . '/includes/Enums/ActivationSource.php',
+    'LicenseManagerForWooCommerce\\Enums\\ActivationProcessor' => $baseDir . '/includes/Enums/ActivationProcessor.php',
     'LicenseManagerForWooCommerce\\Enums\\ColumnType' => $baseDir . '/includes/Enums/ColumnType.php',
     'LicenseManagerForWooCommerce\\Enums\\LicenseSource' => $baseDir . '/includes/Enums/LicenseSource.php',
     'LicenseManagerForWooCommerce\\Enums\\LicenseStatus' => $baseDir . '/includes/Enums/LicenseStatus.php',

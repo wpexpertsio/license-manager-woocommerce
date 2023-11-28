@@ -3,7 +3,7 @@ Contributors: wpexpertsio
 Tags: license key, license, key, software license, serial key, manager, woocommerce, wordpress
 Requires at least: 4.7
 Tested up to: 6.4.1
-Stable tag: 3.0.2
+Stable tag: 3.0.4
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -63,6 +63,10 @@ The plugin will create two files inside the `wp-content/uploads/lmfwc-files` fol
 
 If you would like to contribute to any of these [libraries](https://www.licensemanager.at/docs/rest-api/libraries/nodejs) in these languages (Node.js, Python, PHP, Ruby, .NET, C, C#, C++, and Golang), please visit our library page for more details.
 
+#### Note
+
+Few features like user license display on account page and license certification are fork from Digital License Manager plugin by Darko Gjorgjijoski and we have changed the code according to our need.
+
 == Installation ==
 
 #### Manual installation
@@ -106,20 +110,31 @@ Of course! The plugin comes with REST API routes which allow you to activate, de
 
 == Screenshots ==
 
-1. The license key overview page.
-2. Add a single license key.
-3. Add multiple license keys in bulk.
-4. WooCommerce simple product options.
-5. WooCommerce variable product options.
-6. The generators overview page.
-7. Create a new license key generator.
-8. REST API
+1. What's New
+2. The license key overview page.
+3. Add a single license key.
+4. Add multiple license keys in bulk.
+5. WooCommerce simple product options.
+6. WooCommerce variable product options.
+7. The generators overview page.
+8. Create a new license key generator.
+9. REST API
 
 == Changelog ==
 
 [See changelog for all versions](https://raw.githubusercontent.com/wpexpertsio/license-manager-woocommerce/main/CHANGELOG.md).
 
 == Upgrade Notice ==
+
+= 3.0.4 =
+- Fixed - License key was not appearing on My Account page.
+- Fixed - Php notices in some cases.
+- Fixed - Code optimization.
+- Fixed - License keys not receiving when order is processing.
+- Fixed - PDF not downloading until the order is not completed.
+
+= 3.0.3 =
+- Fixed - Php warnings appears in some cases.
 
 = 3.0.2 =
 - Fixed - License not activating via API

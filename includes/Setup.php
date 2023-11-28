@@ -138,6 +138,8 @@ class Setup
 
     /**
      * Create the necessary database tables.
+     * 
+     * Some of the code written, maintained by Darko Gjorgjijoski
      */
     public static function createTables()
     {

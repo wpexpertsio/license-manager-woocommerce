@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * Some of the code written, maintained by Darko Gjorgjijoski
+ */
 namespace LicenseManagerForWooCommerce\Lists;
 
 use DateTime;
@@ -8,7 +10,7 @@ use LicenseManagerForWooCommerce\Abstracts\AbstractListTable;
 use LicenseManagerForWooCommerce\Models\Resources\LicenseActivation;
 use LicenseManagerForWooCommerce\Repositories\Resources\LicenseActivations as ActivationResourceRepository;
 use LicenseManagerForWooCommerce\Repositories\Resources\License as LicenseResourceRepository;
-use LicenseManagerForWooCommerce\Enums\ActivationSource;
+use LicenseManagerForWooCommerce\Enums\ActivationProcessor;
 use LicenseManagerForWooCommerce\AdminNotice;
 use LicenseManagerForWooCommerce\AdminMenus;
 use LicenseManagerForWooCommerce\Setup;
@@ -338,7 +340,7 @@ class ActivationsList extends WP_List_Table {
 
 		$html = __( 'Other', 'license-manager-for-woocommerce' );
 		if ( $item['source'] ) {
-			$html = ActivationSource::format( (int) $item['source'] );
+			$html = ActivationProcessor::getLabel( (int) $item['source'] );
 		}
 
 		return $html;
@@ -651,7 +653,7 @@ class ActivationsList extends WP_List_Table {
 
         <select name="license-source" id="filter-by-source">
             <option></option>
-			<?php foreach ( ActivationSource::all() as $key => $name ): ?>
+			<?php foreach ( ActivationProcessor::getAllSources() as $key => $name ): ?>
                 <option value="<?php echo esc_attr( $key ); ?>" <?php selected( $selected, $key ); ?>><?php echo esc_attr( $name ); ?></option>
 			<?php endforeach; ?>
         </select>
@@ -719,7 +721,7 @@ class ActivationsList extends WP_List_Table {
 
         if (
             !wp_verify_nonce($_REQUEST['_wpnonce'], $nonceAction) &&
-            !wp_verify_nonce($_REQUEST['_wpnonce'], 'bulk-' . $this->_args['plural'])
+            !wp_verify_nonce($_REQUEST['_wpnonce'], 'bulk-' . $this->_args['plural'] )
         ) {
             AdminNotice::error(__('The nonce is invalid or has expired.', 'license-manager-for-woocommerce'));
             wp_redirect(

@@ -220,6 +220,10 @@ class ProductData
             return;
         }
          $product = wc_get_product( $postId );
+
+         if ( ! is_object( $product ) ) {
+            return;
+         }
         // Update licensed product flag, according to checkbox.
         if (array_key_exists('lmfwc_licensed_product', $_POST)) {
             $product->update_meta_data( 'lmfwc_licensed_product', 1);

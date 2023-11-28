@@ -1,3 +1,13 @@
+##### 3.0.4 - 2023-11-24
+- Fixed - License key was not appearing on My Account page.
+- Fixed - Php notices in some cases.
+- Fixed - Code optimization.
+- Fixed - License keys not receiving when order is processing.
+- Fixed - PDF not downloading until the order is not completed.
+
+##### 3.0.3 - 2023-11-18
+- Fixed - Php warnings appears in some cases.
+
 ##### 3.0.2 - 2023-11-15
 - Fixed - License not activating via API
 
@@ -15,7 +25,7 @@ Fixed - UserId variable in lmfwc_add_license function
 Fixed - OrderBy query Vulnerability 
 
 ##### 2.2.11 - 2023-09-13
-* Fix - OrderBy Queryy Vulnerability 
+* Fix - OrderBy Query Vulnerability 
 
 ##### 2.2.10 - 2023-08-01
 * Fix - The reported vulnerability has been resolved by updating the Feedback SDK to the latest version.

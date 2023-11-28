@@ -37,7 +37,7 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
     public function __construct()
     {
         $this->bootstrap();
-
+      
         add_filter('lmfwc_get_customer_license_keys',     array($this, 'getCustomerLicenseKeys'),     10, 1);
         add_filter('lmfwc_get_all_customer_license_keys', array($this, 'getAllCustomerLicenseKeys'),  10, 1);
         add_filter('lmfwc_get_license_activations',       array($this, 'getLicenseActivations'),  10, 1);
@@ -112,6 +112,18 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
         return $activations;
     }
 
+    public function handle_custom_query_var( $query, $query_vars ) {
+
+    if ( ! empty( $query_vars['lmfwc_order_complete'] ) ) {
+        $query['meta_query'][] = array(
+            'key' => 'lmfwc_order_complete',
+            'value' => 1,
+        );
+    }
+
+    return $query;
+}
+
     /**
      * Retrieves all license keys for a user.
      *
@@ -121,38 +133,27 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
      */
     public function getAllCustomerLicenseKeys($userId)
     {
-        global $wpdb;
-
-        $query = "
-            SELECT
-                DISTINCT(pm1.post_id) AS orderId
-            FROM
-                {$wpdb->postmeta} AS pm1
-            INNER JOIN
-                {$wpdb->postmeta} AS pm2
-                ON 1=1
-                   AND pm1.post_id = pm2.post_id
-            WHERE
-                1=1
-                AND pm1.meta_key = 'lmfwc_order_complete'
-                AND pm1.meta_value = '1'
-                AND pm2.meta_key = '_customer_user'
-                AND pm2.meta_value = '{$userId}'
-        ;";
-
-        $result   = array();
-        $orderIds = $wpdb->get_col($query);
-
-        if (empty($orderIds)) {
-            return array();
-        }
-
-        /** @var LicenseResourceModel[] $licenses */
+        $result = array();
+        $args = array(
+            'limit' => -1,
+            'lmfwc_order_complete' => 1,
+            'customer_id' => $userId 
+        );
+        $orders = wc_get_orders( $args );
+        foreach(  $orders as $order ) {
+             $orderIds = $order->get_id();
+                 
+            if (empty($orderIds)) {
+                return array();
+            }
+       
+                /** @var LicenseResourceModel[] $licenses */
         $licenses = LicenseResourceRepository::instance()->findAllBy(
             array(
                 'order_id' => $orderIds
             )
         );
+
 
         /** @var LicenseResourceModel $license */
         foreach ($licenses as $license) {
@@ -166,6 +167,7 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
 
             $result[$license->getProductId()]['licenses'][] = $license;
         }
+    }
 
         return $result;
     }

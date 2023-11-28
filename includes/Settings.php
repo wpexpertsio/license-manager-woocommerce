@@ -10,7 +10,7 @@ use LicenseManagerForWooCommerce\Repositories\Resources\Generator as GeneratorRe
 use LicenseManagerForWooCommerce\Repositories\Resources\ApiKey as ApiResourceRepository;
 use LicenseManagerForWooCommerce\Repositories\Resources\LicenseActivations as ActivationResourceRepository;
 use LicenseManagerForWooCommerce\Repositories\Resources\LicenseMeta as LicenseMetaResourceRepository;
-use LicenseManagerForWooCommerce\Enums\ActivationSource;
+use LicenseManagerForWooCommerce\Enums\ActivationProcessor;
 use LicenseManagerForWooCommerce\Enums\LicenseSource;
 use Exception;
 

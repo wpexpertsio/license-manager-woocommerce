@@ -31,14 +31,13 @@ class Email
      */
     public function afterOrderTable($order, $isAdminEmail, $plainText, $email)
     {
-        // Return if the order isn't complete.
-        if ($order->get_status() !== 'completed'
-            && !$order->get_meta( 'lmfwc_order_complete')
-        ) {
+        $orderStatusSettings = Settings::get('lmfwc_license_key_delivery_options', Settings::SECTION_WOOCOMMERCE);
+    
+        if ( ! array_key_exists( 'wc-'.$order->get_status(), $orderStatusSettings) ) {
             return;
         }
 
-        if (!$data = apply_filters('lmfwc_get_customer_license_keys', $order)) {
+        if ( ! $data = apply_filters('lmfwc_get_customer_license_keys', $order) ) {
             return;
         }
 

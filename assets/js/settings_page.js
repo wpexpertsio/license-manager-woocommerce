@@ -1,4 +1,6 @@
-
+/**
+ * Some of the code written, maintained by Darko Gjorgjijoski
+ */
 
 document.addEventListener('DOMContentLoaded', function(event) {
     let selectGenerator = jQuery('select#generator');

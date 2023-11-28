@@ -200,7 +200,7 @@ class WooSettings
     public function fieldImageUpload() {
 
         $field = 'lmfwc_company_logo';
-        $placeholder = LMFWC_PLUGIN_URL . 'assets/img/logo-placeholder.jpg';
+        $placeholder = LMFWC_PLUGIN_URL . 'assets/img/logo.jpg';
         $value = isset($this->settings[$field]) ? $this->settings[$field] : ''; 
         $current_src = !empty($value) ? wp_get_attachment_image_src($value, 'large') : '';
         $current_src = !empty($current_src) && is_array($current_src) ? $current_src[0] : $placeholder;

@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * Some of the code written, maintained by Darko Gjorgjijoski
+ */
 namespace LicenseManagerForWooCommerce\Repositories\Resources;
 
 use LicenseManagerForWooCommerce\Abstracts\ResourceRepository as AbstractResourceRepository;

@@ -22,10 +22,13 @@
  * @var int $manual_activations_enabled
  * @var array $rowActions
  * @var \LicenseManagerForWooCommerce\Database\Models\LicenseActivation[] $activations
+ *
+ * Some of the code written, maintained by Darko Gjorgjijoski
+ *
  */
 
 use LicenseManagerForWooCommerce\Models\Resources\License;
-use LicenseManagerForWooCommerce\Enums\ActivationSource;
+use LicenseManagerForWooCommerce\Enums\ActivationProcessor;
 use LicenseManagerForWooCommerce\Enums\LicenseStatus;
 use LicenseManagerForWooCommerce\Integrations\WooCommerce\Activations;
 use LicenseManagerForWooCommerce\Integrations\WooCommerce\Controller;
@@ -81,7 +84,7 @@ use LicenseManagerForWooCommerce\Settings;
                     </td>
                     <td>
 						<?php
-						echo ActivationSource::format( $activation->getSource() );
+						echo ActivationProcessor::getLabel( $activation->getSource() );
 						?>
                     </td>
                     <td>

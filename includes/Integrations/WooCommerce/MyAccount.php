@@ -7,7 +7,7 @@ use Exception;
 use LicenseManagerForWooCommerce\Settings;
 use LicenseManagerForWooCommerce\Repositories\Resources\License as LicenseResourceRepository;
 use LicenseManagerForWooCommerce\Repositories\Resources\LicenseActivations as ActivationResourceRepository;
-use LicenseManagerForWooCommerce\Enums\ActivationSource;
+use LicenseManagerForWooCommerce\Enums\ActivationProcessor;
 
 defined('ABSPATH') || exit;
 
@@ -42,7 +42,7 @@ class MyAccount
                 $nonce = wp_verify_nonce($_POST['_wpnonce'], 'lmfwc_myaccount_activate_license');
                 if ($nonce) {
                     $args = array();
-                    $args['source'] = ActivationSource::WEB;
+                    $args['source'] = ActivationProcessor::WEB;
                     $activate = lmfwc_activate_license($licenseKey,$args);
                     if( is_wp_error ( $activate ) ){
                         wc_add_notice(__('License Key is Expired .' , 'license-manager-for-woocommerce'), 'error');
@@ -206,6 +206,7 @@ class MyAccount
 
         if(  !$licenseID ) {
             $licenseKeys = apply_filters('lmfwc_get_all_customer_license_keys', $user->ID);
+         
             echo wc_get_template_html(
                 'myaccount/lmfwc-view-license-keys.php',
                 array(
@@ -406,7 +407,7 @@ class MyAccount
                 );
                 $license_details[] = array(
                     'title' => __( 'Order Date', 'license-manager-for-woocommerce' ),
-                    'value' => date_i18n( wc_date_format(), strtotime( $order->get_date_paid() ) ),
+                    'value' => date_i18n( wc_date_format(), strtotime( $order->get_date_paid() ?? '' ) ),
                 );
             }
         }

@@ -125,7 +125,6 @@ Of course! The plugin comes with REST API routes which allow you to activate, de
 [See changelog for all versions](https://raw.githubusercontent.com/wpexpertsio/license-manager-woocommerce/main/CHANGELOG.md).
 
 == Upgrade Notice ==
-
 = 3.0.4 =
 - Fixed - License key was not appearing on My Account page.
 - Fixed - Php notices in some cases.

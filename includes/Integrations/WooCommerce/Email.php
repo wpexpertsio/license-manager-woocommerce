@@ -31,8 +31,8 @@ class Email
      */
     public function afterOrderTable($order, $isAdminEmail, $plainText, $email)
     {
-        $orderStatusSettings = Settings::get('lmfwc_license_key_delivery_options', Settings::SECTION_WOOCOMMERCE);
-    
+        $orderStatusSettings = ! empty( Settings::get('lmfwc_license_key_delivery_options', Settings::SECTION_WOOCOMMERCE) ) ? Settings::get('lmfwc_license_key_delivery_options', Settings::SECTION_WOOCOMMERCE) : array();
+        
         if ( ! array_key_exists( 'wc-'.$order->get_status(), $orderStatusSettings) ) {
             return;
         }

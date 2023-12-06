@@ -1,3 +1,7 @@
+##### 3.0.5 - 2023-12-06
+- Fixed - Settings were not updating.
+- Fixed - Php warning in some cases.
+
 ##### 3.0.4 - 2023-11-24
 - Fixed - License key was not appearing on My Account page.
 - Fixed - Php notices in some cases.

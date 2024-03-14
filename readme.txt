@@ -2,8 +2,8 @@
 Contributors: wpexpertsio
 Tags: license key, license, key, software license, serial key, manager, woocommerce, wordpress
 Requires at least: 4.7
-Tested up to: 6.4.1
-Stable tag: 3.0.5
+Tested up to: 6.4.3
+Stable tag: 3.0.6
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -126,8 +126,11 @@ Of course! The plugin comes with REST API routes which allow you to activate, de
 
 == Upgrade Notice ==
 
+= 3.0.6 =
+- Improved - Scripts would load on license manager specific pages only.
+
 = 3.0.5 =
-- Fixed - Settings were not updating.
+- Fixed - Settings not updating after update.
 - Fixed - Php warning in some cases.
 
 = 3.0.4 =

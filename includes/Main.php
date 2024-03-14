@@ -110,13 +110,26 @@ final class Main extends Singleton
             LMFWC_VERSION
         );
 
-        // JavaScript
-        wp_enqueue_script(
-            'lmfwc_admin_js',
-            LMFWC_JS_URL . 'script.js',
-            array(),
-            LMFWC_VERSION
-        );
+        $current_screen = get_current_screen();
+        if ( $hook === 'woocommerce_page_lmfwc_licenses' || $current_screen->id === 'shop_order' ) {
+            // JavaScript
+            wp_enqueue_script(
+                'lmfwc_admin_js',
+                LMFWC_JS_URL . 'script.js',
+                array(),
+                LMFWC_VERSION
+            );
+
+            // Script localization
+            wp_localize_script(
+                'lmfwc_admin_js',
+                'license',
+                array(
+                    'show'     => wp_create_nonce('lmfwc_show_license_key'),
+                    'show_all' => wp_create_nonce('lmfwc_show_all_license_keys'),
+                )
+            );
+        }
 
         // jQuery UI
         wp_register_style(
@@ -133,7 +146,7 @@ final class Main extends Singleton
             wp_enqueue_script('lmfwc_select2_cdn');
             wp_enqueue_style('lmfwc_select2_cdn');
             wp_enqueue_style('lmfwc_select2');
-             wp_enqueue_script('select2');
+            wp_enqueue_script('select2');
         }
 
         // Licenses page
@@ -211,10 +224,7 @@ final class Main extends Singleton
             wp_enqueue_style('lmfwc_select2_cdn');
             wp_enqueue_script('select2');
             wp_enqueue_script('lmfwc_settings_page_js', LMFWC_JS_URL . 'settings_page.js');
-
-        }
-
-        wp_localize_script(
+            wp_localize_script(
                 'lmfwc_settings_page_js',
                 'security',
                 array(
@@ -222,16 +232,7 @@ final class Main extends Singleton
                     'ajaxurl' => admin_url('admin-ajax.php')
                 )
             );
-
-        // Script localization
-        wp_localize_script(
-            'lmfwc_admin_js',
-            'license',
-            array(
-                'show'     => wp_create_nonce('lmfwc_show_license_key'),
-                'show_all' => wp_create_nonce('lmfwc_show_all_license_keys'),
-            )
-        );
+        }
     }
 
     /**

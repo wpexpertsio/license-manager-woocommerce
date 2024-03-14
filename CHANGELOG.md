@@ -1,5 +1,8 @@
-##### 3.0.5 - 2023-12-06
-- Fixed - Settings were not updating.
+##### 3.0.6 - 2024-03-12
+- Improved - Scripts would load on license manager specific pages only.
+
+##### 3.0.5 - 2023-12-05
+- Fixed - Settings not updating after update.
 - Fixed - Php warning in some cases.
 
 ##### 3.0.4 - 2023-11-24

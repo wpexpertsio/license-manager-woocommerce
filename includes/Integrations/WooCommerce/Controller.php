@@ -13,6 +13,7 @@ use LicenseManagerForWooCommerce\Interfaces\IntegrationController as Integration
 use LicenseManagerForWooCommerce\Models\Resources\Generator as GeneratorResourceModel;
 use LicenseManagerForWooCommerce\Models\Resources\License as LicenseResourceModel;
 use LicenseManagerForWooCommerce\Repositories\Resources\License as LicenseResourceRepository;
+use LicenseManagerForWooCommerce\Repositories\Resources\LicenseMeta as LicenseMetaResourceRepository;
 use LicenseManagerForWooCommerce\Integrations\WooCommerce\Stock;
 use LicenseManagerForWooCommerce\Settings;
 use LicenseManagerForWooCommerce\Setup;
@@ -235,7 +236,7 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
             $hashedLicenseKey    = apply_filters('lmfwc_hash', $licenseKey);
 
             // Save to database.
-            LicenseResourceRepository::instance()->insert(
+            $license = LicenseResourceRepository::instance()->insert(
                 array(
                     'order_id'            => $cleanOrderId,
                     'product_id'          => $cleanProductId,
@@ -249,8 +250,24 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
                     'times_activated_max' => $generator->getTimesActivatedMax()
                 )
             );
+
+            if ($license) {
+                $licenseId = $license->getId();
+
+                // no good way to rollback changes here if we fail now
+                // continue attempting tag creation so the rest of the license keys can be inserted
+                foreach($generator->getLicenseTags() as $value) {
+                    LicenseMetaResourceRepository::instance()->insert(
+                        array(
+                            'license_id' => $licenseId,
+                            'meta_key'   => 'license_tag',
+                            'meta_value' => $value
+                        )
+                    );
+                }
+            }
         }
-         
+
         // There have been duplicate keys, regenerate and add them.
         if ($invalidKeysAmount > 0) {
             $newKeys = apply_filters('lmfwc_generate_license_keys', $invalidKeysAmount, $generator);
@@ -263,14 +280,12 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
                 $generator
             );
         }
-
         else {
            if ( $cleanOrderId ) {
                 $order = wc_get_order($cleanOrderId);
                 $order->update_meta_data('lmfwc_order_complete', 1);
                 $order->save();
            }
-          
         }
     }
 
@@ -295,7 +310,8 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
         $productId,
         $userId,
         $validFor,
-        $timesActivatedMax
+        $timesActivatedMax,
+        $licenseTags
     ) {
         $result                 = array();
         $cleanLicenseKeys       = array();
@@ -343,8 +359,20 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
 
             if ($license) {
                 $result['added']++;
-            }
+                $licenseId = $license->getId();
 
+                // no good way to rollback changes here if we fail now
+                // continue attempting tag creation so the rest of the license keys can be inserted
+                foreach($licenseTags as $value) {
+                    LicenseMetaResourceRepository::instance()->insert(
+                        array(
+                            'license_id' => $licenseId,
+                            'meta_key'   => 'license_tag',
+                            'meta_value' => $value
+                        )
+                    );
+                }
+            }
             else {
                 $result['failed']++;
             }

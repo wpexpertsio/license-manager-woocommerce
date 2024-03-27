@@ -49,15 +49,12 @@ abstract class ResourceRepository extends Singleton implements RepositoryInterfa
     function sanitize(&$data)
     {
         foreach ($data as $column => $value) {
-
             switch ($this->mapping[$column]) {
-
                 case ColumnTypeEnum::CHAR:
                 case ColumnTypeEnum::VARCHAR:
                 case ColumnTypeEnum::LONGTEXT:
                 case ColumnTypeEnum::DATETIME:
                 case ColumnTypeEnum::SERIALIZED:
-
                     if ($data[$column] !== null) {
                         $data[$column] = ($value);
                     }
@@ -68,6 +65,9 @@ abstract class ResourceRepository extends Singleton implements RepositoryInterfa
                     if ($data[$column] !== null) {
                         $data[$column] = intval($value);
                     }
+                    break;
+                case ColumnTypeEnum::JSON:
+                    $data[$column] = json_encode($value);
                     break;
             }
         }

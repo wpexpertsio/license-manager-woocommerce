@@ -55,6 +55,15 @@ class Generator
             exit();
         }
 
+        $licenseTags = array();
+        if (array_key_exists('license_tags', $_POST) && $_POST['license_tags'] !== '') {
+            $licenseTags = explode(',', $_POST['license_tags']);
+
+            for ($i=0; $i<count($licenseTags); $i++) {
+                $licenseTags[$i] = trim($licenseTags[$i]);
+            }
+        }
+
         // Save the generator.
         $generator = GeneratorResourceRepository::instance()->insert(
             array(
@@ -66,7 +75,8 @@ class Generator
                 'separator'           => $_POST['separator'],
                 'prefix'              => $_POST['prefix'],
                 'suffix'              => $_POST['suffix'],
-                'expires_in'          => $_POST['expires_in']
+                'expires_in'          => $_POST['expires_in'],
+                'license_tags'        => $licenseTags
             )
         );
 
@@ -149,6 +159,15 @@ class Generator
             exit();
         }
 
+        $licenseTags = array();
+        if (array_key_exists('license_tags', $_POST) && $_POST['license_tags'] !== '') {
+            $licenseTags = explode(',', $_POST['license_tags']);
+
+            for ($i=0; $i<count($licenseTags); $i++) {
+                $licenseTags[$i] = trim($licenseTags[$i]);
+            }
+        }
+
         // Update the generator.
         $generator = GeneratorResourceRepository::instance()->update(
             $_POST['id'],
@@ -161,7 +180,8 @@ class Generator
                 'separator'           => $_POST['separator'],
                 'prefix'              => $_POST['prefix'],
                 'suffix'              => $_POST['suffix'],
-                'expires_in'          => $_POST['expires_in']
+                'expires_in'          => $_POST['expires_in'],
+                'license_tags'        => $licenseTags
             )
         );
 

@@ -6,6 +6,7 @@ use LicenseManagerForWooCommerce\Abstracts\ResourceRepository as AbstractResourc
 use LicenseManagerForWooCommerce\Enums\ColumnType as ColumnTypeEnum;
 use LicenseManagerForWooCommerce\Interfaces\ResourceRepository as ResourceRepositoryInterface;
 use LicenseManagerForWooCommerce\Models\Resources\License as LicenseResourceModel;
+use LicenseManagerForWooCommerce\Repositories\Resources\LicenseMeta as LicenseMetaResourceRepository;
 
 defined('ABSPATH') || exit;
 
@@ -24,6 +25,7 @@ class License extends AbstractResourceRepository implements ResourceRepositoryIn
         global $wpdb;
 
         $this->table      = $wpdb->prefix . self::TABLE;
+        $this->tableMeta  = $wpdb->prefix . LicenseMetaResourceRepository::TABLE;
         $this->primaryKey = 'id';
         $this->model      = LicenseResourceModel::class;
         $this->mapping    = array(

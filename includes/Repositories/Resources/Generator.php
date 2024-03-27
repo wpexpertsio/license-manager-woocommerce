@@ -36,6 +36,7 @@ class Generator extends AbstractResourceRepository implements ResourceRepository
             'prefix'              => ColumnTypeEnum::VARCHAR,
             'suffix'              => ColumnTypeEnum::VARCHAR,
             'expires_in'          => ColumnTypeEnum::INT,
+            'license_tags'        => ColumnTypeEnum::JSON,
         );
     }
 }

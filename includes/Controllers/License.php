@@ -9,6 +9,7 @@ use LicenseManagerForWooCommerce\Enums\LicenseSource;
 use LicenseManagerForWooCommerce\Enums\LicenseStatus as LicenseStatusEnum;
 use LicenseManagerForWooCommerce\Models\Resources\License as LicenseResourceModel;
 use LicenseManagerForWooCommerce\Repositories\Resources\License as LicenseResourceRepository;
+use LicenseManagerForWooCommerce\Repositories\Resources\LicenseMeta as LicenseMetaResourceRepository;
 
 defined('ABSPATH') || exit;
 
@@ -43,6 +44,7 @@ class License
         $status      = LicenseStatusEnum::ACTIVE;
         $source      = $_POST['source'];
         $licenseKeys = array();
+        $licenseTags = array();
 
         if (array_key_exists('order_id', $_POST) && $_POST['order_id']) {
             $orderId = $_POST['order_id'];
@@ -77,6 +79,12 @@ class License
             exit();
         }
 
+        if (array_key_exists('tags', $_POST) && $_POST['tags'] !== '') {
+            foreach(explode(',', $_POST['tags']) as $value) {
+                $licenseTags[] = trim($value);
+            }
+        }
+
         // Save the imported keys
         try {
             $result = apply_filters(
@@ -87,7 +95,8 @@ class License
                 $productId,
                 $userId,
                 $_POST['valid_for'],
-                $_POST['times_activated_max']
+                $_POST['times_activated_max'],
+                $licenseTags
             );
         } catch (Exception $e) {
             AdminNotice::error(__($e->getMessage(), 'license-manager-for-woocommerce'));
@@ -210,14 +219,51 @@ class License
 
         // Redirect with message
         if ($license) {
-            AdminNotice::success(__('1 license key(s) added successfully.', 'license-manager-for-woocommerce'));
+            $licenseId = $license->getId();
+            $errorCreatingMeta = false;
 
-            // Update the stock
-            if ($license->getStatus() == LicenseStatusEnum::ACTIVE) {
-                apply_filters('lmfwc_stock_increase', $productId);
+            if (array_key_exists('tags', $_POST) && $_POST['tags'] !== '') {
+                foreach(explode(',', $_POST['tags']) as $value) {
+                    $licenseMeta = LicenseMetaResourceRepository::instance()->insert(
+                        array(
+                            'license_id' => $licenseId,
+                            'meta_key'   => 'license_tag',
+                            'meta_value' => trim($value)
+                        )
+                    );
+
+                    if (!$licenseMeta) {
+                        $errorCreatingMeta = true;
+                        break;
+                    }
+                }
+            }
+
+            if ($errorCreatingMeta === true) {
+                // rollback changes
+                LicenseResourceRepository::instance()->deleteBy(
+                    array(
+                        'id' => $licenseId
+                    )
+                );
+                LicenseMetaResourceRepository::instance()->deleteBy(
+                    array(
+                        'license_id' => $licenseId
+                    )
+                );
+
+                AdminNotice::error(__('There was a problem adding the license tags. License key was not created.',
+                    'license-manager-for-woocommerce'));
+            }
+            else {
+                AdminNotice::success(__('1 license key(s) added successfully.', 'license-manager-for-woocommerce'));
+
+                // Update the stock
+                if ($license->getStatus() == LicenseStatusEnum::ACTIVE) {
+                    apply_filters('lmfwc_stock_increase', $productId);
+                }
             }
         }
-
         else {
             AdminNotice::error(__('There was a problem adding the license key.', 'license-manager-for-woocommerce'));
         }
@@ -304,15 +350,93 @@ class License
         );
 
         if ($license) {
-            // Update the stock
-            if ($license->getProductId() !== null && $license->getStatus() === LicenseStatusEnum::ACTIVE) {
-                apply_filters('lmfwc_stock_increase', $license->getProductId());
+            $licenseId = $license->getId();
+            $errorUpdatingMeta = false;
+
+            if (array_key_exists('tags', $_POST) && $_POST['tags'] !== '') {
+                $oldMetaVals = array();
+                $newMetaVals = array();
+
+                foreach (LicenseMetaResourceRepository::instance()->findAllBy(
+                    array(
+                        'license_id' => $licenseId,
+                        'meta_key' => 'license_tag'
+                    )
+                ) as $metaRow) {
+                    $oldMetaVals[] = $metaRow->getMetaValue();
+                }
+
+                foreach(explode(',', $_POST['tags']) as $value) {
+                    $newMetaVals[] = trim($value);
+                }
+
+                $deleteMetaVals = array_diff($oldMetaVals, $newMetaVals);
+                $addMetaVals = array_diff($newMetaVals, $oldMetaVals);
+
+                foreach ($deleteMetaVals as $value) {
+                    $deleteResult = LicenseMetaResourceRepository::instance()->deleteBy(
+                        array(
+                            'license_id' => $licenseId,
+                            'meta_key' => 'license_tag',
+                            'meta_value' => $value
+                        )
+                    );
+                    if (!$deleteResult) {
+                        $errorUpdatingMeta = true;
+                        break;
+                    }
+                }
+                if ($errorUpdatingMeta === false) {
+                    foreach ($addMetaVals as $value) {
+                        $licenseMeta = LicenseMetaResourceRepository::instance()->insert(
+                            array(
+                                'license_id' => $licenseId,
+                                'meta_key' => 'license_tag',
+                                'meta_value' => $value
+                            )
+                        );
+                        if (!$licenseMeta) {
+                            $errorUpdatingMeta = true;
+                            break;
+                        }
+                    }
+                }
             }
 
-            // Display a success message
-            AdminNotice::success(__('Your license key has been updated successfully.', 'license-manager-for-woocommerce'));
-        }
+            if ($errorUpdatingMeta === true) {
+                // rollback changes
+                foreach ($addMetaVals as $value) {
+                    LicenseResourceRepository::instance()->deleteBy(
+                        array(
+                            'license_id' => $licenseId,
+                            'meta_key' => 'license_tag',
+                            'meta_value' => $value
+                        )
+                    );
+                }
+                foreach ($deleteMetaVals as $value) {
+                    LicenseResourceRepository::instance()->insert(
+                        array(
+                            'license_id' => $licenseId,
+                            'meta_key' => 'license_tag',
+                            'meta_value' => $value
+                        )
+                    );
+                }
 
+                AdminNotice::error(__('There was a problem updating the license tags.',
+                    'license-manager-for-woocommerce'));
+            }
+            else {
+                // Update the stock
+                if ($license->getProductId() !== null && $license->getStatus() === LicenseStatusEnum::ACTIVE) {
+                    apply_filters('lmfwc_stock_increase', $license->getProductId());
+                }
+
+                // Display a success message
+                AdminNotice::success(__('Your license key has been updated successfully.', 'license-manager-for-woocommerce'));
+            }
+        }
         else {
             //Display an error message
             AdminNotice::error(__('There was a problem updating the license key.', 'license-manager-for-woocommerce'));

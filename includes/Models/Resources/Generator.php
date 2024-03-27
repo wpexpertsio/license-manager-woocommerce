@@ -61,6 +61,11 @@ class Generator extends AbstractResourceModel implements ModelInterface
     protected $expiresIn;
 
     /**
+     * @var array
+     */
+    protected $licenseTags;
+
+    /**
      * @var string
      */
     protected $createdAt;
@@ -101,6 +106,12 @@ class Generator extends AbstractResourceModel implements ModelInterface
         $this->prefix            = $generator->prefix;
         $this->suffix            = $generator->suffix;
         $this->expiresIn         = $generator->expires_in;
+        if (is_string($generator->license_tags)) {
+            $this->setLicenseTagsFromJson($generator->license_tags);
+        }
+        else {
+            $this->setLicenseTags($generator->license_tags);
+        }
         $this->createdAt         = $generator->created_at;
         $this->createdBy         = $generator->created_by;
         $this->updatedAt         = $generator->updated_at;
@@ -265,6 +276,60 @@ class Generator extends AbstractResourceModel implements ModelInterface
     public function setExpiresIn($expiresIn)
     {
         $this->expiresIn = $expiresIn;
+    }
+
+    /**
+     * @return array
+     */
+    public function getLicenseTags()
+    {
+        return $this->licenseTags;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLicenseTagsAsJson()
+    {
+        return json_encode($this->licenseTags);
+    }
+
+    /**
+     * @return string
+     */
+    public function getLicenseTagsAsCsv()
+    {
+        return implode(',', $this->licenseTags);
+    }
+
+    /**
+     * @param array $val
+     */
+    public function setLicenseTags($val)
+    {
+        $this->licenseTags = $val === null ? array() : array_values($val);
+    }
+
+    /**
+     * @param string $val
+     */
+    public function setLicenseTagsFromJson($val)
+    {
+        $val = json_decode($val, true);
+        $this->licenseTags = $val === null ? array() : array_values($val);
+    }
+
+    /**
+     * @param string $val
+     */
+    public function setLicenseTagsFromCsv($val)
+    {
+        if ($val === null || $val === '') {
+            $this->licenseTags = array();
+        }
+        else {
+            $this->licenseTags = explode(',', $val);
+        }
     }
 
     /**

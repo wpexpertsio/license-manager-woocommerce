@@ -149,6 +149,15 @@ defined('ABSPATH') || exit;
             </td>
         </tr>
 
+        <!-- TAGS -->
+        <tr scope="row">
+            <th scope="row"><label for="multiple__tags"><?php esc_html_e('Tags', 'license-manager-for-woocommerce');?></label></th>
+            <td>
+                <input name="tags" id="multiple__tags" class="regular-text" type="text" value="<?php echo esc_html(implode(',', $license->getTags())); ?>">
+                <p class="description"><?php esc_html_e('A comma separated list of tags to identify this license key.', 'license-manager-for-woocommerce');?></p>
+            </td>
+        </tr>
+
         </tbody>
     </table>
 

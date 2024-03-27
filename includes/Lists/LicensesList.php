@@ -9,6 +9,7 @@ use LicenseManagerForWooCommerce\AdminNotice;
 use LicenseManagerForWooCommerce\Enums\LicenseStatus;
 use LicenseManagerForWooCommerce\Models\Resources\License as LicenseResourceModel;
 use LicenseManagerForWooCommerce\Repositories\Resources\License as LicenseResourceRepository;
+use LicenseManagerForWooCommerce\Repositories\Resources\LicenseMeta as LicenseMetaResourceRepository;
 use LicenseManagerForWooCommerce\Settings;
 use LicenseManagerForWooCommerce\Setup;
 use WC_Product;
@@ -32,6 +33,11 @@ class LicensesList extends WP_List_Table
      * @var string
      */
     protected $table;
+
+    /**
+     * @var string
+     */
+    protected $tableMeta;
 
     /**
      * @var string
@@ -69,6 +75,7 @@ class LicensesList extends WP_List_Table
         );
 
         $this->table      = $wpdb->prefix . Setup::LICENSES_TABLE_NAME;
+        $this->tableMeta  = $wpdb->prefix . Setup::LICENSE_META_TABLE_NAME;
         $this->dateFormat = get_option('date_format');
         $this->timeFormat = get_option('time_format');
         $this->gmtOffset  = get_option('gmt_offset');
@@ -856,18 +863,31 @@ class LicensesList extends WP_List_Table
     {
         global $wpdb;
 
-        $sql = "SELECT * FROM {$this->table} WHERE 1 = 1";
+        $sql = "SELECT t1.*,t2.tags from " . $this->table .
+            " t1 LEFT JOIN (SELECT license_id AS id,GROUP_CONCAT(meta_value) AS tags FROM " .
+            $this->tableMeta . " WHERE meta_key='license_tag' GROUP BY id) t2 ON t1.id=t2.id";
+
+        // Applies the tag search box filter or prepares query for license filters
+        if (array_key_exists('s_license_tag', $_REQUEST) && $_REQUEST['s_license_tag']) {
+            $sql .= $wpdb->prepare(
+                " JOIN {$this->tableMeta} t3 ON t1.id=t3.license_id WHERE t3.meta_key='license_tag' AND t3.meta_value=%s",
+                sanitize_text_field($_REQUEST['s_license_tag'])
+            );
+        }
+        else {
+            $sql .=  ' WHERE 1=1';
+        }
 
         // Applies the view filter
         if ($this->isViewFilterActive()) {
             $sql .= $wpdb->prepare(' AND status = %d', intval($_GET['status']));
         }
 
-        // Applies the search box filter
-        if (array_key_exists('s', $_REQUEST) && $_REQUEST['s']) {
+        // Applies the license search box filter
+        if (array_key_exists('s_license_key', $_REQUEST) && $_REQUEST['s_license_key']) {
             $sql .= $wpdb->prepare(
                 ' AND hash = %s',
-                apply_filters('lmfwc_hash', sanitize_text_field($_REQUEST['s']))
+                apply_filters('lmfwc_hash', sanitize_text_field($_REQUEST['s_license_key']))
             );
         }
 
@@ -903,7 +923,18 @@ class LicensesList extends WP_List_Table
     {
         global $wpdb;
 
-        $sql = "SELECT COUNT(*) FROM {$this->table} WHERE 1 = 1";
+        $sql = "SELECT COUNT(t1.id) FROM {$this->table} t1";
+
+        // Applies the tag search box filter or prepares query for license filters
+        if (array_key_exists('s_license_tag', $_REQUEST) && $_REQUEST['s_license_tag']) {
+            $sql .= $wpdb->prepare(
+                " JOIN {$this->tableMeta} t2 ON t1.id=t2.license_id WHERE t2.meta_key='license_tag' AND t2.meta_value=%s",
+                sanitize_text_field($_REQUEST['s_license_tag'])
+            );
+        }
+        else {
+            $sql .=  ' WHERE 1=1';
+        }
 
         if ($this->isViewFilterActive()) {
             $sql .= $wpdb->prepare(' AND status = %d', intval($_GET['status']));
@@ -913,10 +944,11 @@ class LicensesList extends WP_List_Table
             $sql .= $wpdb->prepare(' AND order_id = %d', intval($_REQUEST['order-id']));
         }
 
-        if (array_key_exists('s', $_REQUEST) && $_REQUEST['s']) {
+        // Applies the license search box filter
+        if (array_key_exists('s_license_key', $_REQUEST) && $_REQUEST['s_license_key']) {
             $sql .= $wpdb->prepare(
                 ' AND hash = %s',
-                apply_filters('lmfwc_hash', sanitize_text_field($_REQUEST['s']))
+                apply_filters('lmfwc_hash', sanitize_text_field($_REQUEST['s_license_key']))
             );
         }
 
@@ -947,7 +979,8 @@ class LicensesList extends WP_List_Table
             'valid_for'   => __('Valid for', 'license-manager-for-woocommerce'),
             'status'      => __('Status', 'license-manager-for-woocommerce'),
             'created'     => __('Created', 'license-manager-for-woocommerce'),
-            'updated'     => __('Updated', 'license-manager-for-woocommerce')
+            'updated'     => __('Updated', 'license-manager-for-woocommerce'),
+            'tags'        => __('Tags', 'license-manager-for-woocommerce')
         );
 
         return apply_filters('lmfwc_table_licenses_column_name', $columns);
@@ -1078,6 +1111,12 @@ class LicensesList extends WP_List_Table
             $result = LicenseResourceRepository::instance()->delete((array)$licenseKeyId);
 
             if ($result) {
+                LicenseMetaResourceRepository::instance()->deleteBy(
+                    array(
+                        'license_id' => $license->getId()
+                    )
+                );
+
                 // Update the stock
                 if ($license->getProductId() !== null && $license->getStatus() === LicenseStatus::ACTIVE) {
                     apply_filters('lmfwc_stock_decrease', $license->getProductId());
@@ -1145,21 +1184,24 @@ class LicensesList extends WP_List_Table
      */
     public function search_box($text, $input_id)
     {
-        if (empty($_REQUEST['s']) && !$this->has_items()) {
+        $searchParam = 's_' . $input_id;
+
+        if (empty($_REQUEST[$searchParam]) && !$this->has_items()) {
             return;
         }
 
         $input_id    = $input_id . '-search-input';
-        $searchQuery = isset($_REQUEST['s']) ? sanitize_text_field(wp_unslash($_REQUEST['s'])) : '';
+        $submit_id   = $input_id . '-search-submit';
+        $searchQuery = isset($_REQUEST[$searchParam]) ? sanitize_text_field(wp_unslash($_REQUEST[$searchParam])) : '';
 
         echo '<p class="search-box">';
-        echo '<label class="screen-reader-text" for="' . esc_attr( $input_id ) . '">' . esc_html( $text ) . ':</label>';
-        echo '<input type="search" id="' . esc_attr($input_id) . '" name="s" value="' . esc_attr($searchQuery) . '" />';
+        echo '<label class="screen-reader-text" for="' . esc_attr($input_id) . '">' . esc_html($text) . ':</label>';
+        echo '<input type="search" id="' . esc_attr($input_id) . '" name="' . esc_attr($searchParam) . '" value="' . esc_attr($searchQuery) . '" />';
 
         submit_button(
             $text, '', '', false,
             array(
-                'id' => 'search-submit',
+                'id' => $submit_id,
             )
         );
 

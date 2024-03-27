@@ -1,3 +1,8 @@
+##### 3.0.7 - 2024-03-20
+- Added - Support for license tagging.
+- Added - Support for generating licenses with tags.
+- Added - License tags in API response.
+
 ##### 3.0.6 - 2024-03-12
 - Improved - Scripts would load on license manager specific pages only.
 

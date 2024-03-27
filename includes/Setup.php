@@ -39,7 +39,7 @@ class Setup
     /**
      * @var int
      */
-    const DB_VERSION = 109;
+    const DB_VERSION = 110;
 
     /**
      * Installation script.
@@ -55,8 +55,6 @@ class Setup
         self::backwardSupport();
         self::setDefaultFilesAndFolders();
         self::setDefaultSettings();
-
-        
     }
 
     /**
@@ -187,6 +185,7 @@ class Setup
                 `prefix` VARCHAR(255) NULL DEFAULT NULL,
                 `suffix` VARCHAR(255) NULL DEFAULT NULL,
                 `expires_in` INT(10) UNSIGNED NULL DEFAULT NULL,
+                `license_tags` JSON NOT NULL,
                 `created_at` DATETIME NULL,
                 `created_by` BIGINT(20) UNSIGNED NULL DEFAULT NULL,
                 `updated_at` DATETIME NULL DEFAULT NULL,

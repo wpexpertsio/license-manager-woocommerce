@@ -53,12 +53,15 @@ class GeneratorsList extends WP_List_Table
         global $wpdb;
 
         $sql = "SELECT * FROM {$this->table}";
-          $sql .= isset($_REQUEST['orderby']) && !empty(sanitize_sql_orderby($_REQUEST['orderby'])) ?  ' ORDER BY ' . sanitize_sql_orderby($_REQUEST['orderby']) : ' ORDER BY ' . sanitize_sql_orderby('id');
+        $sql .= isset($_REQUEST['orderby']) && !empty(sanitize_sql_orderby($_REQUEST['orderby'])) ?  ' ORDER BY ' . sanitize_sql_orderby($_REQUEST['orderby']) : ' ORDER BY ' . sanitize_sql_orderby('id');
         $sql .= isset($_REQUEST['order']) && !empty(sanitize_sql_orderby($_REQUEST['order']))   ? ' ' . sanitize_sql_orderby($_REQUEST['order']) : sanitize_sql_orderby(' DESC');
         $sql .= " LIMIT {$perPage}";
         $sql .= ' OFFSET ' . ($pageNumber - 1) * $perPage;
 
         $results = $wpdb->get_results($sql, ARRAY_A);
+        for ($i=0; $i<count($results); $i++) {
+            $results[$i]['license_tags'] = implode(',', json_decode($results[$i]['license_tags']));
+        }
 
         return $results;
     }
@@ -263,7 +266,8 @@ class GeneratorsList extends WP_List_Table
             'separator'           => __('Separator', 'license-manager-for-woocommerce'),
             'prefix'              => __('Prefix', 'license-manager-for-woocommerce'),
             'suffix'              => __('Suffix', 'license-manager-for-woocommerce'),
-            'expires_in'          => __('Expires in', 'license-manager-for-woocommerce')
+            'expires_in'          => __('Expires in', 'license-manager-for-woocommerce'),
+            'license_tags'        => __('License tags', 'license-manager-for-woocommerce'),
         );
     }
 

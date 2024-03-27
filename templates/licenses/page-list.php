@@ -16,6 +16,7 @@
         $licenses->prepare_items();
         $licenses->views();
         $licenses->search_box(__( 'Search license key', 'license-manager-for-woocommerce' ), 'license_key');
+        $licenses->search_box(__( 'Search license tag', 'license-manager-for-woocommerce' ), 'license_tag');
         $licenses->display();
     ?>
 </form>

@@ -10,6 +10,7 @@ use LicenseManagerForWooCommerce\Enums\LicenseStatus as LicenseStatusEnum;
 use LicenseManagerForWooCommerce\Models\Resources\License as LicenseResourceModel;
 use LicenseManagerForWooCommerce\Repositories\Resources\License as LicenseResourceRepository;
 use LicenseManagerForWooCommerce\Repositories\Resources\LicenseActivations as ActivationResourceRepository;
+use LicenseManagerForWooCommerce\Repositories\Resources\LicenseMeta as LicenseMetaResourceRepository;
 use LicenseManagerForWooCommerce\Enums\ActivationProcessor;
 
 defined('ABSPATH') || exit;
@@ -95,6 +96,41 @@ function lmfwc_add_license($licenseKey, $licenseData = array())
 
     if (!$license) {
         return false;
+    }
+
+    if (array_key_exists('tags', $licenseData)) {
+        $licenseId = $license->getId();
+        $errorCreatingMeta = false;
+
+        foreach(explode(',', $licenseData['tags']) as $value) {
+            $licenseMeta = LicenseMetaResourceRepository::instance()->insert(
+                array(
+                    'license_id' => $licenseId,
+                    'meta_key'   => 'license_tag',
+                    'meta_value' => $value
+                )
+            );
+
+            if (!$licenseMeta) {
+                $errorCreatingMeta = true;
+                break;
+            }
+        }
+
+        if ($errorCreatingMeta === true) {
+            // rollback changes
+            LicenseResourceRepository::instance()->deleteBy(
+                array(
+                    'id' => $licenseId
+                )
+            );
+            LicenseMetaResourceRepository::instance()->deleteBy(
+                array(
+                    'license_id' => $license->getId()
+                )
+            );
+            return false;
+        }
     }
 
     // Update the stock
@@ -329,6 +365,16 @@ function lmfwc_delete_license($licenseKey)
     );
 
     if (!$license) {
+        return false;
+    }
+
+    $deleteResult = LicenseMetaResourceRepository::instance()->deleteBy(
+        array(
+            'license_id' => $license->getId()
+        )
+    );
+
+    if (!$deleteResult) {
         return false;
     }
 

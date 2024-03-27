@@ -4,10 +4,8 @@ namespace LicenseManagerForWooCommerce\Models\Resources;
 
 use LicenseManagerForWooCommerce\Abstracts\ResourceModel as AbstractResourceModel;
 use LicenseManagerForWooCommerce\Interfaces\Model as ModelInterface;
-use LicenseManagerForWooCommerce\Repositories\Resources\LicenseActivations ;
+use LicenseManagerForWooCommerce\Repositories\Resources\LicenseMeta as LicenseMetaResourceRepository;
 use stdClass;
-use DateTime;
-use DateTimeZone;
 
 defined('ABSPATH') || exit;
 
@@ -94,6 +92,11 @@ class License extends AbstractResourceModel implements ModelInterface
     protected $updatedBy;
 
     /**
+     * @var array
+     */
+    protected $tags;
+
+    /**
      * License constructor.
      *
      * @param stdClass $license
@@ -119,7 +122,7 @@ class License extends AbstractResourceModel implements ModelInterface
         $this->createdAt         = $license->created_at;
         $this->createdBy         = $license->created_by === null ? null : intval($license->created_by);
         $this->updatedAt         = $license->updated_at;
-        $this->updatedBy         = $license->updated_by === null ? null : intval($license->updated_by);
+        $this->tags              = $license->tags === null ? $this->queryTags() : $license->tags;
     }
 
     /**
@@ -202,7 +205,6 @@ class License extends AbstractResourceModel implements ModelInterface
         $this->licenseKey = $licenseKey;
     }
 
-
     /**
      * @return string
      */
@@ -234,9 +236,6 @@ class License extends AbstractResourceModel implements ModelInterface
     {
         return $this->expiresAt;
     }
-
-
-
 
     /**
      * @param string $expiresAt
@@ -309,8 +308,6 @@ class License extends AbstractResourceModel implements ModelInterface
     {
         $this->timesActivated = $timesActivated;
     }
-
-   
 
     /**
      * @return int
@@ -390,5 +387,39 @@ class License extends AbstractResourceModel implements ModelInterface
     public function setUpdatedBy($updatedBy)
     {
         $this->updatedBy = $updatedBy;
+    }
+
+    /**
+     * @return array
+     */
+    protected function queryTags()
+    {
+        $result = array();
+        $metaRows = LicenseMetaResourceRepository::instance()->findAllBy(
+            array(
+                'license_id' => $this->id,
+                'meta_key' => 'license_tag'
+            )
+        );
+        foreach ($metaRows as $metaRow) {
+            $result[] = $metaRow->getMetaValue();
+        }
+        return $result;
+    }
+
+    /**
+     * @return array
+     */
+    public function getTags()
+    {
+        return $this->tags;
+    }
+
+    /**
+     * @param array $tags
+     */
+    public function setTags($tags)
+    {
+        $this->tags = $tags;
     }
 }

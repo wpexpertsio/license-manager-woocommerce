@@ -46,4 +46,6 @@ class ColumnType
     CONST DATETIME = 'DATETIME';
 
     CONST SERIALIZED = 'SERIALIZED';
+
+    CONST JSON = 'JSON';
 }

@@ -322,16 +322,6 @@ class Licenses extends LMFWC_REST_Controller
                     'hash' => apply_filters('lmfwc_hash', $licenseKey)
                 )
             );
-
-             $activations = ActivationsResourceRepository::instance()->findAllBy(
-                    array(
-                        'license_id' => $license->getId()
-                    )
-                );
-                $activation = array();
-                foreach( $activations as $activation_data){
-                    $activation[] = $activation_data->toArray();
-                }
         } catch (Exception $e) {
             return new WP_Error(
                 'lmfwc_rest_data_error',
@@ -339,7 +329,6 @@ class Licenses extends LMFWC_REST_Controller
                 array('status' => 404)
             );
         }
-
         if (!$license) {
             return new WP_Error(
                 'lmfwc_rest_data_error',
@@ -350,7 +339,16 @@ class Licenses extends LMFWC_REST_Controller
                 array('status' => 404)
             );
         }
-
+        
+        $activations = ActivationsResourceRepository::instance()->findAllBy(
+            array(
+                'license_id' => $license->getId()
+            )
+        );
+        $activation = array();
+        foreach( $activations as $activation_data){
+            $activation[] = $activation_data->toArray();
+        }
         $licenseData = $license->toArray();
 
         // Remove the hash and decrypt the license key

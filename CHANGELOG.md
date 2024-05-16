@@ -1,3 +1,7 @@
+##### 3.0.7 - 2024-05-16
+- Improved - License page error handling if no license found.
+- Improved - API filter parameters for ammending data.
+
 ##### 3.0.6 - 2024-03-12
 - Improved - Scripts would load on license manager specific pages only.
 

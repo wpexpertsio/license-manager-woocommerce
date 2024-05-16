@@ -23,12 +23,13 @@ class RestController extends WP_REST_Controller
      * @return WP_REST_Response
      */
    
-    protected function response($success, $data, $route, $code = 200)
+    protected function response($success, $data, $code = 200, $route)
     {
+        $request_method = isset( $_SERVER['REQUEST_METHOD'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) : '';
         return new WP_REST_Response(
             array(
                 'success' => $success,
-                'data'    => apply_filters('lmfwc_rest_api_pre_response', $_SERVER['REQUEST_METHOD'], $route, $data)
+                'data'    => apply_filters('lmfwc_rest_api_pre_response', $data, $request_method, $route)
             ),
             $code
         );

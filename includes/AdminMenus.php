@@ -383,7 +383,7 @@ class AdminMenus
                         } 
                     }
 
-                    $users       = apply_filters('lmfwc_get_users', null);
+                    $users       = apply_filters('lmfwc_get_users', get_users(array( 'fields' => array( 'user_login', 'user_email', 'ID' ))));
                     $permissions = array(
                         'read'       => __('Read', 'license-manager-for-woocommerce'),
                         'write'      => __('Write', 'license-manager-for-woocommerce'),

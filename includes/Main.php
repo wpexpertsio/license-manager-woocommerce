@@ -313,7 +313,6 @@ final class Main extends Singleton
         new AdminNotice();
         new Generator();
         new Repositories\PostMeta();
-        new Repositories\Users();
         new LicenseController();
         new GeneratorController();
         new DropdownsController();

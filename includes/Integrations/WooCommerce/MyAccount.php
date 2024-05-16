@@ -184,7 +184,7 @@ class MyAccount
     public function viewLicenseKeys() {
         global $wp_query;
         wp_enqueue_style('lmfwc_admin_css', LMFWC_CSS_URL . 'main.css');
-        $user = wp_get_current_user();
+        $user_id = get_current_user_id();
         $licenseID = null;
         $page = 1;
         
@@ -205,7 +205,7 @@ class MyAccount
         
 
         if(  !$licenseID ) {
-            $licenseKeys = apply_filters('lmfwc_get_all_customer_license_keys', $user->ID);
+            $licenseKeys = apply_filters('lmfwc_get_all_customer_license_keys', $user_id);
          
             echo wc_get_template_html(
                 'myaccount/lmfwc-view-license-keys.php',
@@ -227,7 +227,7 @@ class MyAccount
             )
         );
 
-         if ( is_wp_error( $license ) && $license->getUserId()  != $user->ID ) {
+         if ( is_wp_error( $license ) || !$license || $license->getUserId() != $user_id ) {
             echo sprintf( '<h3>%s</h3>', __( 'Not found', 'license-manager-for-woocommerce' ) );
             echo sprintf( '<p>%s</p>', __( 'The license you are looking for is not found.', 'license-manager-for-woocommerce' ) );
 

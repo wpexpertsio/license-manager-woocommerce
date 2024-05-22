@@ -17,7 +17,6 @@ namespace LicenseManagerForWooCommerce;
 
 defined('ABSPATH') || exit;
 
-require_once __DIR__ . '/freemius_integration.php';
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/functions/lmfwc-core-functions.php';
 require_once __DIR__ . '/functions/lmfwc-license-functions.php';

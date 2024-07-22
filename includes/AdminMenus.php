@@ -99,7 +99,7 @@ class AdminMenus
      * @return array
      */
     public function createSettingsTab($settings_tab) {
-        $settings_tab[self::SETTINGS_PAGE] = __( 'License Manager', 'license-manager-for-woocommerce' );
+        $settings_tab[self::SETTINGS_PAGE] = esc_html__( 'License Manager', 'license-manager-for-woocommerce' );
             return $settings_tab;
     }
 
@@ -125,8 +125,8 @@ class AdminMenus
 
         $licensesHook = add_submenu_page(
             self::WOOCOMMERCE_PAGE,
-            __('License Keys', 'license-manager-for-woocommerce'),
-            __('License Keys', 'license-manager-for-woocommerce'),
+            esc_html__('License Keys', 'license-manager-for-woocommerce'),
+            esc_html__('License Keys', 'license-manager-for-woocommerce'),
             'manage_options',
             self::LICENSES_PAGE,
             array($this, 'licensesPage')
@@ -136,8 +136,8 @@ class AdminMenus
         // Generators List Page
         $generatorsHook = add_submenu_page(
             self::WOOCOMMERCE_PAGE,
-            __('Generators', 'license-manager-for-woocommerce'),
-            __('Generators', 'license-manager-for-woocommerce'),
+            esc_html__('Generators', 'license-manager-for-woocommerce'),
+            esc_html__('Generators', 'license-manager-for-woocommerce'),
             'manage_options',
             self::GENERATORS_PAGE,
             array($this, 'generatorsPage')
@@ -146,8 +146,8 @@ class AdminMenus
 
         $activationsHook = add_submenu_page(
             self::WOOCOMMERCE_PAGE,
-            __('Activations', 'license-manager-for-woocommerce'),
-            __('Activations', 'license-manager-for-woocommerce'),
+            esc_html__('Activations', 'license-manager-for-woocommerce'),
+            esc_html__('Activations', 'license-manager-for-woocommerce'),
             'manage_options',
             self::ACTIVATIONS_PAGE,
             array($this, 'activationsPage')
@@ -162,7 +162,7 @@ class AdminMenus
     {
         $option = 'per_page';
         $args = array(
-            'label' => __('License keys per page', 'license-manager-for-woocommerce'),
+            'label' => esc_html__('License keys per page', 'license-manager-for-woocommerce'),
             'default' => 10,
             'option' => 'lmfwc_licenses_per_page'
         );
@@ -179,7 +179,7 @@ class AdminMenus
     {
         $option = 'per_page';
         $args = array(
-            'label'   => __('Generators per page', 'license-manager-for-woocommerce'),
+            'label'   => esc_html__('Generators per page', 'license-manager-for-woocommerce'),
             'default' => 10,
             'option'  => 'generators_per_page'
         );
@@ -207,7 +207,7 @@ class AdminMenus
     {
         $option = 'per_page';
         $args = array(
-            'label'   => __('Activations per page', 'license-manager-for-woocommerce'),
+            'label'   => esc_html__('Activations per page', 'license-manager-for-woocommerce'),
             'default' => 10,
             'option'  => 'activations_per_page'
         );
@@ -242,7 +242,7 @@ class AdminMenus
         // Edit license keys
         if ($action === 'edit') {
             if (!current_user_can('manage_options')) {
-                wp_die(__('Insufficient permission', 'license-manager-for-woocommerce'));
+                wp_die(esc_html__('Insufficient permission', 'license-manager-for-woocommerce'));
             }
 
             /** @var LicenseResourceModel $license */
@@ -259,7 +259,7 @@ class AdminMenus
             }
 
             if (!$license) {
-                wp_die(__('Invalid license key ID', 'license-manager-for-woocommerce'));
+                wp_die(esc_html__('Invalid license key ID', 'license-manager-for-woocommerce'));
             }
 
             $licenseKey = $license->getDecryptedLicenseKey();
@@ -304,7 +304,7 @@ class AdminMenus
         // Edit generators
         if ($action === 'edit') {
             if (!current_user_can('manage_options')) {
-                wp_die(__('Insufficient permission', 'license-manager-for-woocommerce'));
+                wp_die(esc_html__('Insufficient permission', 'license-manager-for-woocommerce'));
             }
 
             if (!array_key_exists('edit', $_GET) && !array_key_exists('id', $_GET)) {
@@ -375,6 +375,7 @@ class AdminMenus
                             $lastAccess = $keyData->getLastAccess();
                             if ($lastAccess !== null) {
                                 $date = sprintf(
+                                    // Translators: Date and time format for displaying last access date.
                                     esc_html__('%1$s at %2$s', 'license-manager-for-woocommerce'),
                                     date_i18n(wc_date_format(), strtotime($lastAccess)),
                                     date_i18n(wc_time_format(), strtotime($lastAccess))
@@ -385,9 +386,9 @@ class AdminMenus
 
                     $users       = apply_filters('lmfwc_get_users', get_users(array( 'fields' => array( 'user_login', 'user_email', 'ID' ))));
                     $permissions = array(
-                        'read'       => __('Read', 'license-manager-for-woocommerce'),
-                        'write'      => __('Write', 'license-manager-for-woocommerce'),
-                        'read_write' => __('Read/Write', 'license-manager-for-woocommerce'),
+                        'read'       => esc_html__('Read', 'license-manager-for-woocommerce'),
+                        'write'      => esc_html__('Write', 'license-manager-for-woocommerce'),
+                        'read_write' => esc_html__('Read/Write', 'license-manager-for-woocommerce'),
                     );
 
                     if ($keyId && $userId && ! current_user_can('edit_user', $userId)) {
@@ -467,10 +468,12 @@ class AdminMenus
         if (isset($currentScreen->id) && in_array($currentScreen->id, $this->getPluginPageIDs())) {
             // Change the footer text
             $footerText = sprintf(
+                // Translators: Placeholder 1 is replaced with "License Manager for WooCommerce" (HTML strong tag), Placeholder 2 is replaced with a link to rate the plugin with 5 stars.
                 __('If you like %1$s please leave us a %2$s rating. A huge thanks in advance!', 'license-manager-for-woocommerce'),
                 sprintf('<strong>%s</strong>', esc_html__('License Manager for WooCommerce', 'license-manager-for-woocommerce')),
                 '<a href="https://wordpress.org/support/plugin/license-manager-for-woocommerce/reviews/?rate=5#new-post" target="_blank" class="wc-rating-link" data-rated="' . esc_attr__('Thanks :)', 'license-manager-for-woocommerce') . '">&#9733;&#9733;&#9733;&#9733;&#9733;</a>'
             );
+            
         }
 
         return $footerText;

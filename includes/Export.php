@@ -64,11 +64,11 @@ class Export
 
         echo '<table>';
         echo '<thead>';
-        echo '<img src="' . $logo . '" alt="Logo" style="width: 100px;">';
+        echo '<img src="' . esc_url($logo) . '" alt="Logo" style="width: 100px;">';
         echo '<tr>';
-        
+       
         foreach ($header as $columnName => $col) {
-            echo '<th>' .$col.'</th>';
+            echo '<th>' . esc_html($col) . '</th>';
         }
         echo '</tr></thead><tbody>';
         // Data
@@ -76,7 +76,7 @@ class Export
         foreach ($licenseKeys as $row) {
             echo '<tr>';
             foreach ($row as $columnName => $col) {
-                echo '<td>'.$col.'</td>';
+                echo '<th>' . esc_html($col) . '</th>';
             }
             echo '</tr>';
         }

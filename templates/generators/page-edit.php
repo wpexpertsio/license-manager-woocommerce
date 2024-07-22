@@ -17,8 +17,8 @@ defined('ABSPATH') || exit;
     <ul>
         <?php foreach ($products as $product): ?>
             <li>
-                <a href="<?php esc_html_e(get_edit_post_link($product->get_id()));?>">
-                    <span><?php esc_html_e($product->get_name());?></span>
+                <a href="<?php echo esc_url(get_edit_post_link($product->get_id()));?>">
+                    <span><?php echo esc_html($product->get_name());?></span>
                 </a>
             </li>
         <?php endforeach; ?>
@@ -66,7 +66,7 @@ defined('ABSPATH') || exit;
                     <input name="charset" id="charset" class="regular-text" type="text" value="<?php echo esc_html($generator->getCharset()); ?>">
                     <p class="description" id="tagline-description">
                         <b><?php esc_html_e('Required.', 'license-manager-for-woocommerce');?></b>
-                        <span><?php _e('The characters which will be used for generating a license key, i.e. for <code>12-AB-34-CD</code> the character map is <code>ABCD1234</code>.', 'license-manager-for-woocommerce');?></span>
+                        <span><?php   echo wp_kses( 'The characters which will be used for generating a license key, i.e. for <code>12-AB-34-CD</code> the character map is <code>ABCD1234</code>.', lmfwc_shapeSpace_allowed_html() );?></span>
                     </p>
                 </td>
             </tr>
@@ -81,7 +81,7 @@ defined('ABSPATH') || exit;
                     <input name="chunks" id="chunks" class="regular-text" type="text" value="<?php echo esc_html($generator->getChunks()); ?>">
                     <p class="description" id="tagline-description">
                         <b><?php esc_html_e('Required.', 'license-manager-for-woocommerce');?></b>
-                        <span><?php _e('The number of separated character sets, i.e. for <code>12-AB-34-CD</code> the number of chunks is <code>4</code>.', 'license-manager-for-woocommerce');?></span>
+                        <span><?php   echo wp_kses( 'The number of separated character sets, i.e. for <code>12-AB-34-CD</code> the number of chunks is <code>4</code>.', lmfwc_shapeSpace_allowed_html() ); ?></span>
                     </p>
                 </td>
             </tr>
@@ -96,7 +96,7 @@ defined('ABSPATH') || exit;
                     <input name="chunk_length" id="chunk_length" class="regular-text" type="text" value="<?php echo esc_html($generator->getChunkLength()); ?>">
                     <p class="description" id="tagline-description">
                         <b><?php esc_html_e('Required.', 'license-manager-for-woocommerce');?></b>
-                        <span><?php _e('The character length of an individual chunk, i.e. for <code>12-AB-34-CD</code> the chunk length is <code>2</code>.', 'license-manager-for-woocommerce');?></span>
+                        <span><?php   echo wp_kses( 'The character length of an individual chunk, i.e. for <code>12-AB-34-CD</code> the chunk length is <code>2</code>.', lmfwc_shapeSpace_allowed_html() ); ?></span>
                     </p>
                 </td>
             </tr>
@@ -108,7 +108,7 @@ defined('ABSPATH') || exit;
                     <input name="separator" id="separator" class="regular-text" type="text" value="<?php echo esc_html($generator->getSeparator()); ?>">
                     <p class="description" id="tagline-description">
                         <b><?php esc_html_e('Optional.', 'license-manager-for-woocommerce');?></b>
-                        <span><?php _e('The special character separating the individual chunks, i.e. for <code>12-AB-34-CD</code> the separator is <code>-</code>.', 'license-manager-for-woocommerce');?></span>
+                        <span><?php echo wp_kses('The special character separating the individual chunks, i.e. for <code>12-AB-34-CD</code> the separator is <code>-</code>.', lmfwc_shapeSpace_allowed_html() ); ?></span>
                     </p>
                 </td>
             </tr>
@@ -120,7 +120,7 @@ defined('ABSPATH') || exit;
                     <input name="prefix" id="prefix" class="regular-text" type="text" value="<?php echo esc_html($generator->getPrefix()); ?>">
                     <p class="description" id="tagline-description">
                         <b><?php esc_html_e('Optional.', 'license-manager-for-woocommerce');?></b>
-                        <span><?php _e('Adds a character set at the start of a license key (separator <b>not</b> included), i.e. for <code>PRE-12-AB-34-CD</code> the prefix is <code>PRE-</code>.', 'license-manager-for-woocommerce');?></span>
+                        <span><?php   echo wp_kses( 'Adds a character set at the start of a license key (separator <b>not</b> included), i.e. for <code>PRE-12-AB-34-CD</code> the prefix is <code>PRE-</code>.', lmfwc_shapeSpace_allowed_html() ); ?></span>
                     </p>
                 </td>
             </tr>
@@ -132,7 +132,7 @@ defined('ABSPATH') || exit;
                     <input name="suffix" id="suffix" class="regular-text" type="text" value="<?php echo esc_html($generator->getSuffix()); ?>">
                     <p class="description" id="tagline-description">
                         <b><?php esc_html_e('Optional.', 'license-manager-for-woocommerce');?></b>
-                        <span><?php _e('Adds a character set at the end of a license key (separator <b>not</b> included), i.e. for <code>12-AB-34-CD-SUF</code> the suffix is <code>-SUF</code>.', 'license-manager-for-woocommerce');?></span>
+                        <span><?php   echo wp_kses( 'Adds a character set at the end of a license key (separator <b>not</b> included), i.e. for <code>12-AB-34-CD-SUF</code> the suffix is <code>-SUF</code>.', lmfwc_shapeSpace_allowed_html() ); ?></span>
                     </p>
                 </td>
             </tr>

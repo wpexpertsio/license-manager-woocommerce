@@ -81,7 +81,7 @@ class General
             'lmfwc_license_keys',
             'license_keys_section'
         );
-         add_settings_field(
+        add_settings_field(
             'lmfwc_expire_format',
             __('License expiration format', 'license-manager-for-woocommerce'),
             array($this, 'fieldExpireFormat'),
@@ -90,26 +90,35 @@ class General
         );
     }
 
-    public function fieldExpireFormat( ) {
+    public function fieldExpireFormat()
+    {
         $field = 'lmfwc_expire_format';
         $value = isset($this->settings[$field]) ? $this->settings[$field] : '';
         $html = '<fieldset>';
-        $html  .= sprintf( '<input type="text" id="%s" name="lmfwc_settings_general[%s]" value="%s" >',$field,
-            $field, $value );
-        $html .= '<br><br>'; 
-        $html  .= sprintf(
-                    /* translators: %1$s: date format merge code, %2$s: time format merge code, %3$s: general settings URL, %4$s: link to date and time formatting documentation */
-                    __( '<code>%1$s</code> and <code>%2$s</code> will be replaced by formats from <a href="%3$s">Administration > Settings > General</a>. %4$s', 'license-manager-for-woocommerce' ),
-                    '{{DATE_FORMAT}}',
-                    '{{TIME_FORMAT}}',
-                    esc_url( admin_url( 'options-general.php' ) ),
-                    __( '<a href="https://wordpress.org/support/article/formatting-date-and-time/">Documentation on date and time formatting</a>.' )
-                );
+        $html .= sprintf(
+            '<input type="text" id="%s" name="lmfwc_settings_general[%s]" value="%s" >',
+            esc_attr($field), // Escape field ID
+            esc_attr($field), // Escape field name
+            esc_attr($value)  // Escape field value
+        );
+        $html .= '<br><br>';
+        $html .= sprintf(
+            /* translators: %1$s: date format merge code, %2$s: time format merge code, %3$s: general settings URL, %4$s: link to date and time formatting documentation */
+            __(
+                '<code>%1$s</code> and <code>%2$s</code> will be replaced by formats from <a href="%3$s">Administration > Settings > General</a>. %4$s',
+                'license-manager-for-woocommerce'
+            ),
+            '{{DATE_FORMAT}}',
+            '{{TIME_FORMAT}}',
+            esc_url(admin_url('options-general.php')), // Escape admin URL
+            __(
+                '<a href="https://wordpress.org/support/article/formatting-date-and-time/">Documentation on date and time formatting</a>.'
+            )
+        );
         $html .= '</fieldset>';
-     
-
-        echo nl2br($html);
+        echo wp_kses($html, lmfwc_shapeSpace_allowed_html());
     }
+    
 
     
     
@@ -172,7 +181,7 @@ class General
         );
         $html .= '</fieldset>';
 
-        echo $html;
+        echo wp_kses($html, lmfwc_shapeSpace_allowed_html());
     }
 
     /**
@@ -201,7 +210,7 @@ class General
 
         $html .= '</fieldset>';
 
-        echo $html;
+        echo wp_kses($html, lmfwc_shapeSpace_allowed_html());
     }
 
    
@@ -234,7 +243,7 @@ class General
         );
         $html .= '</fieldset>';
 
-        echo $html;
+        echo wp_kses($html, lmfwc_shapeSpace_allowed_html());
     }
 
     /**
@@ -371,12 +380,14 @@ class General
         $html .= sprintf(
             '<p class="description" style="margin-top: 1em;">%s</p>',
             sprintf(
+                 /* translators: %1$s: date format merge code, %2$s: time format merge code, %3$s: general settings URL, %4$s: link to date and time formatting documentation */
                 __('The complete <b>API documentation</b> can be found <a href="%s" target="_blank" rel="noopener">here</a>.', 'license-manager-for-woocommerce'),
                 'https://www.licensemanager.at/docs/rest-api/getting-started/api-keys'
             )
         );
+        
         $html .= '</fieldset>';
 
-        echo $html;
+        echo wp_kses($html, lmfwc_shapeSpace_allowed_html());
     }
 }

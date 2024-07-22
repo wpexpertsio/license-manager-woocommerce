@@ -102,8 +102,9 @@ class ProductData
 
         echo sprintf(
             '<div id="%s" class="panel woocommerce_options_panel"><div class="options_group">',
-            self::ADMIN_TAB_TARGET
+            esc_attr(self::ADMIN_TAB_TARGET)
         );
+        
 
         echo '<input type="hidden" name="lmfwc_edit_flag" value="true" />';
 
@@ -172,17 +173,20 @@ class ProductData
             )
         );
 
+        $count = LicenseResourceRepository::instance()->countBy(
+            array(
+                'product_id' => $post->ID,
+                'status' => LicenseStatus::ACTIVE
+            )
+        );
+        
         echo sprintf(
             '<p class="form-field"><label>%s</label><span class="description">%d %s</span></p>',
-            __('Available', 'license-manager-for-woocommerce'),
-            LicenseResourceRepository::instance()->countBy(
-                array(
-                    'product_id' => $post->ID,
-                    'status' => LicenseStatus::ACTIVE
-                )
-            ),
-            __('License key(s) in stock and available for sale', 'license-manager-for-woocommerce')
+            esc_html__('Available', 'license-manager-for-woocommerce'),
+            esc_html($count),
+            esc_html__('License key(s) in stock and available for sale', 'license-manager-for-woocommerce')
         );
+        
 
         do_action('lmfwc_product_data_panel', $post);
 
@@ -197,13 +201,16 @@ class ProductData
      */
     public function styleInventoryManagement()
     {
+        $unicode_content = '\f160'; // Unicode for the desired Dashicons icon
+    
         echo sprintf(
             '<style>#woocommerce-product-data ul.wc-tabs li.%s_options a:before { font-family: %s; content: "%s"; }</style>',
-            self::ADMIN_TAB_NAME,
-            'dashicons',
-            '\f160'
+            esc_attr(self::ADMIN_TAB_NAME), // Escape the tab name for use in CSS class selector
+            esc_attr('dashicons'), // Escape the font-family name
+            esc_attr($unicode_content) // Escape the Unicode content for CSS content property
         );
     }
+    
 
     /**
      * Hook which triggers when the WooCommerce Product is being saved or updated.
@@ -310,7 +317,7 @@ class ProductData
 
         echo '<div class="panel woocommerce_options_panel" style="width: 100%;"><div class="options_group">';
 
-        echo sprintf('<strong>%s</strong>', __('License Manager for WooCommerce', 'license-manager-for-woocommerce'));
+        echo sprintf('<strong>%s</strong>', esc_html__('License Manager for WooCommerce', 'license-manager-for-woocommerce'));
 
         echo '<input type="hidden" name="lmfwc_edit_flag" value="true" />';
 
@@ -319,8 +326,8 @@ class ProductData
             array(
                 'id'          => 'lmfwc_licensed_product',
                 'name'        => sprintf('lmfwc_licensed_product[%d]', $loop),
-                'label'       => __('Sell license key(s)', 'license-manager-for-woocommerce'),
-                'description' => __('Sell license keys for this variation', 'license-manager-for-woocommerce'),
+                'label'       => esc_html__('Sell license key(s)', 'license-manager-for-woocommerce'),
+                'description' => esc_html__('Sell license keys for this variation', 'license-manager-for-woocommerce'),
                 'value'       => $licensed,
                 'cbvalue'     => 1,
                 'desc_tip'    => false
@@ -386,15 +393,16 @@ class ProductData
 
         echo sprintf(
             '<p class="form-field"><label>%s</label><span class="description">%d %s</span></p>',
-            __('Available', 'license-manager-for-woocommerce'),
-            LicenseResourceRepository::instance()->countBy(
+            esc_html__('Available', 'license-manager-for-woocommerce'),
+            esc_html(LicenseResourceRepository::instance()->countBy(
                 array(
                     'product_id' => $productId,
                     'status' => LicenseStatus::ACTIVE
                 )
-            ),
-            __('License key(s) in stock and available for sale.', 'license-manager-for-woocommerce')
+            )),
+            esc_html__('License key(s) in stock and available for sale.', 'license-manager-for-woocommerce')
         );
+        
 
         echo '</div></div>';
     }

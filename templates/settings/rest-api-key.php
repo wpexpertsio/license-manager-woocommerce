@@ -11,11 +11,11 @@ defined('ABSPATH') || exit;
 <h2><?php esc_html_e('Key details', 'license-manager-for-woocommerce');?></h2>
 <hr class="wp-header-end">
 
-<form method="post" action="<?=admin_url('admin-post.php');?>">
-    <input type="hidden" name="id" value="<?php esc_html_e($keyId); ?>">
+<form method="post" action="<?=esc_url(admin_url('admin-post.php'));?>">
+    <input type="hidden" name="id" value="<?php echo esc_attr($keyId); ?>">
     <?php wp_nonce_field('lmfwc-api-key-update'); ?>
     <input type="hidden" name="action" value="<?='lmfwc_api_key_update';?>">
-    <input type="hidden" name="lmfwc_action" value="<?php esc_attr_e($action);?>">
+    <input type="hidden" name="lmfwc_action" value="<?php echo esc_attr($action); ?>">
 
     <table class="form-table">
         <tbody>
@@ -52,11 +52,11 @@ defined('ABSPATH') || exit;
 
                                 echo sprintf(
                                     '<option value="%s" %s>%s (#%d - %s)</option>',
-                                    $user->ID,
-                                    $selected,
-                                    $user->user_login,
-                                    $user->ID,
-                                    $user->user_email
+                                    esc_attr( $user->ID ),
+                                    selected( $user->ID, $selected, false ),
+                                    esc_html( $user->user_login ),
+                                    esc_attr( $user->ID ),
+                                    esc_html( $user->user_email )
                                 );
                             endforeach;
                         ?>
@@ -131,7 +131,7 @@ defined('ABSPATH') || exit;
                                 'key' => $keyId
                             ),
                             sprintf(
-                                admin_url('admin.php?page=%s&tab=%2s&section=rest_api'),
+                                esc_url(admin_url('admin.php?page=%s&tab=%2s&section=rest_api')),
                                 \LicenseManagerForWooCommerce\AdminMenus::WC_SETTINGS_PAGE, \LicenseManagerForWooCommerce\AdminMenus::SETTINGS_PAGE
                             )
                         ),

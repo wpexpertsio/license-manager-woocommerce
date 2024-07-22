@@ -9,8 +9,8 @@ defined('ABSPATH') || exit;
 <h1 class="wp-heading-inline"><?php esc_html_e('Edit license key', 'license-manager-for-woocommerce'); ?></h1>
 <hr class="wp-header-end">
 
-<form method="post" action="<?php echo admin_url('admin-post.php');?>">
-    <input type="hidden" name="source" value="<?php echo esc_html($license->getSource()); ?>">
+<form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+    <input type="hidden" name="source" value="<?php echo esc_attr($license->getSource()); ?>">
     <input type="hidden" name="action" value="lmfwc_update_license_key">
     <?php wp_nonce_field('lmfwc_update_license_key'); ?>
 
@@ -21,7 +21,7 @@ defined('ABSPATH') || exit;
         <tr scope="row">
             <th scope="row"><label for="edit__license_id"><?php esc_html_e('ID', 'license-manager-for-woocommerce');?></label></th>
             <td>
-                <input name="license_id" id="edit__license_id" class="regular-text" type="text" value="<?php echo esc_html($license->getId()); ?>" readonly>
+                <input name="license_id" id="edit__license_id" class="regular-text" type="text" value="<?php echo esc_attr($license->getId()); ?>" readonly>
             </td>
         </tr>
 
@@ -29,7 +29,7 @@ defined('ABSPATH') || exit;
         <tr scope="row">
             <th scope="row"><label for="edit__license_key"><?php esc_html_e('License key', 'license-manager-for-woocommerce');?></label></th>
             <td>
-                <input name="license_key" id="edit__license_key" class="regular-text" type="text" value="<?php echo esc_html($licenseKey); ?>">
+                <input name="license_key" id="edit__license_key" class="regular-text" type="text" value="<?php echo esc_attr($licenseKey); ?>">
                 <p class="description"><?php esc_html_e('The license key will be encrypted before it is stored inside the database.', 'license-manager-for-woocommerce');?></p>
             </td>
         </tr>
@@ -38,7 +38,7 @@ defined('ABSPATH') || exit;
         <tr scope="row">
             <th scope="row"><label for="edit__valid_for"><?php esc_html_e('Valid for (days)', 'license-manager-for-woocommerce');?></label></th>
             <td>
-                <input name="valid_for" type="number" id="edit__valid_for" class="regular-text" type="text" value="<?php echo esc_html($license->getValidFor()); ?>">
+                <input name="valid_for" type="number" id="edit__valid_for" class="regular-text" value="<?php echo esc_attr($license->getValidFor()); ?>">
                 <p class="description"><?php esc_html_e('Number of days for which the license key is valid after purchase. Leave blank if the license key does not expire. Cannot be used at the same time as the "Expires at" field.', 'license-manager-for-woocommerce');?></p>
             </td>
         </tr>
@@ -47,7 +47,7 @@ defined('ABSPATH') || exit;
         <tr scope="row">
             <th scope="row"><label for="edit__expires_at"><?php esc_html_e('Expires at', 'license-manager-for-woocommerce');?></label></th>
             <td>
-                <input name="expires_at" id="edit__expires_at" class="regular-text" type="text" value="<?php echo esc_html($expiresAt); ?>">
+                <input name="expires_at" id="edit__expires_at" class="regular-text" type="text" value="<?php echo esc_attr($expiresAt); ?>">
                 <p class="description"><?php esc_html_e('The exact date this license key expires on. Leave blank if the license key does not expire. Cannot be used at the same time as the "Valid for (days)" field.', 'license-manager-for-woocommerce');?></p>
             </td>
         </tr>
@@ -56,7 +56,7 @@ defined('ABSPATH') || exit;
         <tr scope="row">
             <th scope="row"><label for="edit__times_activated_max"><?php esc_html_e('Maximum activation count', 'license-manager-for-woocommerce');?></label></th>
             <td>
-                <input name="times_activated_max" id="edit__times_activated_max" class="regular-text" type="number" value="<?php echo esc_html($license->getTimesActivatedMax()); ?>">
+                <input name="times_activated_max" id="edit__times_activated_max" class="regular-text" type="number" value="<?php echo esc_attr($license->getTimesActivatedMax()); ?>">
                 <p class="description"><?php esc_html_e('Define how many times the license key can be marked as "activated" by using the REST API. Leave blank if you do not use the API.', 'license-manager-for-woocommerce');?></p>
             </td>
         </tr>
@@ -67,7 +67,7 @@ defined('ABSPATH') || exit;
             <td>
                 <select id="edit__status" name="status" class="regular-text">
                     <?php foreach($statusOptions as $option): ?>
-                        <option value="<?php echo esc_html($option['value']); ?>" <?php selected($option['value'], $license->getStatus(), true); ?>>
+                        <option value="<?php echo esc_attr($option['value']); ?>" <?php selected($option['value'], $license->getStatus(), true); ?>>
                             <span><?php echo esc_html($option['name']); ?></span>
                         </option>
                     <?php endforeach; ?>
@@ -87,10 +87,10 @@ defined('ABSPATH') || exit;
                         if ($order) {
                             echo sprintf(
                                 '<option value="%d" selected="selected">#%d %s <%s></option>',
-                                $order->get_id(),
-                                $order->get_id(),
-                                $order->get_formatted_billing_full_name(),
-                                $order->get_billing_email()
+                                esc_attr($order->get_id()),
+                                esc_html($order->get_id()),
+                                esc_html($order->get_formatted_billing_full_name()),
+                                esc_html($order->get_billing_email())
                             );
                         }
                     }
@@ -112,9 +112,9 @@ defined('ABSPATH') || exit;
                         if ($product) {
                             echo sprintf(
                                 '<option value="%d" selected="selected">(#%d) %s</option>',
-                                $product->get_id(),
-                                $product->get_id(),
-                                $product->get_formatted_name()
+                                esc_attr($product->get_id()),
+                                esc_html($product->get_id()),
+                                esc_html($product->get_formatted_name())
                             );
                         }
                     }
@@ -136,10 +136,10 @@ defined('ABSPATH') || exit;
                         if ($user) {
                             echo sprintf(
                                 '<option value="%d" selected="selected">%s (#%d - %s)</option>',
-                                $user->ID,
-                                $user->user_nicename,
-                                $user->ID,
-                                $user->user_email
+                                esc_attr($user->ID),
+                                esc_html($user->user_nicename),
+                                esc_html($user->ID),
+                                esc_html($user->user_email)
                             );
                         }
                     }

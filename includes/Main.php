@@ -111,7 +111,7 @@ final class Main extends Singleton
         );
 
         $current_screen = get_current_screen();
-        if ( $hook === 'woocommerce_page_lmfwc_licenses' || $current_screen->id === 'shop_order' ) {
+        if ( $hook === 'woocommerce_page_lmfwc_licenses' || $current_screen->id === 'shop_order' || $current_screen->id === 'woocommerce_page_wc-orders' ) {
             // JavaScript
             wp_enqueue_script(
                 'lmfwc_admin_js',

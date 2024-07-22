@@ -501,8 +501,15 @@ class ActivationsList extends WP_List_Table {
 			ActivationResourceRepository::instance()->update( $recordId, array( 'deactivated_at' => $new_value ) );
 			$count ++;
 		}
-
-		AdminNotice::success( sprintf( esc_html__( '%d %s(s) updated successfully.', 'license-manager-for-woocommerce' ), $count, strtolower( $this->_args['plural'] ) ) );
+		
+		AdminNotice::success(
+			sprintf(
+				// Translators: %1$d is the number of items updated, %2$s is the plural noun for the items being updated.
+				esc_html__('%1$d %2$s(s) updated successfully.', 'license-manager-for-woocommerce'),
+				$count,
+				strtolower($this->_args['plural'])
+			)
+		);
 		wp_redirect( admin_url( sprintf( 'admin.php?page=%s', $this->slug ) ) );
 	}
 
@@ -594,6 +601,7 @@ class ActivationsList extends WP_List_Table {
                 $count += $result;
             }
         }
+		// Translators: %d is the number of activation records deleted.
 		$message = sprintf( esc_html__( '%d activation record(s) permanently deleted.', 'license-manager-for-woocommerce' ), $count );
 
 		// Set the admin notice
@@ -630,7 +638,7 @@ class ActivationsList extends WP_List_Table {
 		$selected = isset( $_REQUEST['license-id'] ) ? (int) $_REQUEST['license-id'] : '';
 		?>
         <label for="filter-by-license-id" class="screen-reader-text">
-            <span><?php _e( 'Filter by license', 'license-manager-for-woocommerce' ); ?></span>
+            <span><?php esc_html_e( 'Filter by license', 'license-manager-for-woocommerce' ); ?></span>
         </label><select name="license-id" id="filter-by-license-id">
             <option></option>
 			<?php if ( $selected ): ?>
@@ -648,7 +656,7 @@ class ActivationsList extends WP_List_Table {
 		$selected = isset( $_REQUEST['license-source'] ) ? (int) $_REQUEST['license-source'] : - 1;
 		?>
         <label for="filter-by-source" class="screen-reader-text">
-            <span><?php _e( 'Filter by source', 'license-manager-for-woocommerce' ); ?></span>
+            <span><?php esc_html_e( 'Filter by source', 'license-manager-for-woocommerce' ); ?></span>
         </label>
 
         <select name="license-source" id="filter-by-source">

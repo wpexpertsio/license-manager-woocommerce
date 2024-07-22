@@ -74,7 +74,12 @@ class Settings
 
                 $result               = $this->doStep( $useProductConf, $generatorId, $page );
                 $next['order_ids'] = $result;
-                $step_message         = sprintf( __( 'Page %d of %d completed successfully.' ), $page, $next['total'] );
+                $step_message = sprintf(
+                    /* translators: %1$d is the current page number, %2$d is the total number of pages */
+                    __( 'Page %1$d of %2$d completed successfully.', 'your-text-domain' ),
+                    $page,
+                    $next['total']
+                );                
                 $next['error_message'] = is_wp_error( $result ) ? $result->get_error_message() : $step_message;
                 wp_send_json_success( $next );
                 exit;
@@ -288,7 +293,11 @@ class Settings
 
         if ( empty( $results->orders ) ) {
             delete_transient('max_order_pages');
-            return new \WP_Error( 'not_found', sprintf( __( 'No orders found for page %s' ), $page ) );
+            return new \WP_Error(
+                'not_found',
+                /* translators: %s is the page number */
+                sprintf( __( 'No orders found for page %s', 'your-text-domain' ), $page )
+            );            
         }
         $generator      = GeneratorResourceRepository::instance()->find( $generatorId );
 
@@ -345,7 +354,17 @@ class Settings
                         );
 
                         if ( ! is_wp_error( $status ) ) {
-                            $order->add_order_note( sprintf( __( 'Generated %d license(s) for order item #%d (product #%d) with generator #%d via the "Past Orders License Generator" tool.', 'license-manager-for-woocommerce' ), count( $licenses ), $item->get_id(), $item->get_product_id(), $productGenerators[ $productId ]->getId() ) );
+                            $order->add_order_note(
+                                sprintf(
+                                    /* translators: 1: Number of licenses generated, 2: Order item ID, 3: Product ID, 4: Generator ID */
+                                    __( 'Generated %1$d license(s) for order item #%2$d (product #%3$d) with generator #%4$d via the "Past Orders License Generator" tool.', 'license-manager-for-woocommerce' ),
+                                    count( $licenses ),
+                                    $item->get_id(),
+                                    $item->get_product_id(),
+                                    $productGenerators[ $productId ]->getId()
+                                )
+                            );
+                            
                             $generated ++;
                         }
                     }
@@ -389,12 +408,23 @@ class Settings
 
         if ( $page === $total_pages ) {
             $data['next_page'] = $next_page <= $total_pages ? $nextpage : -1;
-            $data['message']   = sprintf( __( 'Operation Complete (%d/%d)', 'digital-license-manager' ), $page, $total_pages );
+            $data['message'] = sprintf(
+                /* translators: 1: Current page number, 2: Total number of pages */
+                __( 'Operation Complete (%1$d/%2$d)', 'digital-license-manager' ),
+                $page,
+                $total_pages
+            );
             delete_transient('max_order_pages');
 
         } else if ( $page < $total_pages ) {
             $data['next_page'] = $next_page;
-            $data['message']   = sprintf( __( 'Processing (%d/%d)', 'digital-license-manager' ), $page, $total_pages );
+            $data['message'] = sprintf(
+                /* translators: 1: Current page number, 2: Total number of pages */
+                __( 'Processing (%1$d/%2$d)', 'digital-license-manager' ),
+                $page,
+                $total_pages
+            );
+            
         } else {
             $data['next_page'] = - 1;
             $data['message']   = __( 'Operation complete.', 'digital-license-manager' );

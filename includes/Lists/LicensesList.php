@@ -166,24 +166,25 @@ class LicensesList extends WP_List_Table
     public function orderDropdown()
     {
         $order = false;
-
+    
         if (isset($_REQUEST['order-id'])) {
             $order = wc_get_order((int)$_REQUEST['order-id']);
         }
-
+    
         ?>
         <label for="filter-by-order-id" class="screen-reader-text">
-            <span><?php _e('Filter by order', 'license-manager-for-woocommerce'); ?></span>
+            <span><?php echo esc_html__('Filter by order', 'license-manager-for-woocommerce'); ?></span>
         </label>
         <select name="order-id" id="filter-by-order-id">
             <?php if ($order): ?>
                 <option selected="selected" value="<?php echo esc_attr($order->get_id()); ?>">
-                    <?php echo $order->get_formatted_billing_full_name(); ?>
+                    <?php echo esc_html($order->get_formatted_billing_full_name()); ?>
                 </option>
             <?php endif; ?>
         </select>
         <?php
     }
+    
 
     /**
      * Displays the product dropdown filter.
@@ -198,12 +199,12 @@ class LicensesList extends WP_List_Table
 
         ?>
         <label for="filter-by-product-id" class="screen-reader-text">
-            <span><?php _e('Filter by product', 'license-manager-for-woocommerce'); ?></span>
+            <span><?php esc_html_e('Filter by product', 'license-manager-for-woocommerce'); ?></span>
         </label>
         <select name="product-id" id="filter-by-product-id">
             <?php if ($product): ?>
                 <option selected="selected" value="<?php echo esc_attr($product->get_id()); ?>">
-                    <?php echo $product->get_name(); ?>
+                    <?php echo esc_html($product->get_name()); ?>
                 </option>
             <?php endif; ?>
         </select>
@@ -216,27 +217,28 @@ class LicensesList extends WP_List_Table
     public function userDropdown()
     {
         $user = false;
-
+    
         if (isset($_REQUEST['user-id'])) {
             $user = get_user_by('ID', (int)$_REQUEST['user-id']);
         }
         ?>
         <label for="filter-by-user-id" class="screen-reader-text">
-            <span><?php _e('Filter by user', 'license-manager-for-woocommerce'); ?></span>
+            <span><?php echo esc_html__('Filter by user', 'license-manager-for-woocommerce'); ?></span>
         </label>
         <select name="user-id" id="filter-by-user-id">
             <?php if ($user) {
                 printf(
                     '<option value="%d" selected="selected">%s (#%d - %s)</option>',
-                    $user->ID,
-                    $user->display_name,
-                    $user->ID,
-                    $user->user_email
+                    esc_attr($user->ID),
+                    esc_html($user->display_name),
+                    esc_attr($user->ID),
+                    esc_html($user->user_email)
                 );
             } ?>
         </select>
         <?php
     }
+    
 
     /**
      * Checkbox column.
@@ -284,7 +286,12 @@ class LicensesList extends WP_List_Table
         }
 
         // ID
-        $actions['id'] = sprintf(__('ID: %d', 'license-manager-for-woocommerce'), intval($item['id']));
+        $actions['id'] = sprintf(
+            /* translators: %d is the ID of the item */
+            __('ID: %d', 'license-manager-for-woocommerce'),
+            intval($item['id'])
+        );
+        
 
         // Edit
         $actions['edit'] = sprintf(
@@ -928,7 +935,7 @@ class LicensesList extends WP_List_Table
      */
     public function no_items()
     {
-        _e('No license keys found.', 'license-manager-for-woocommerce');
+        esc_html_e('No license keys found.', 'license-manager-for-woocommerce');
     }
 
     /**
@@ -1049,7 +1056,14 @@ class LicensesList extends WP_List_Table
         }
 
         // Set the admin notice, redirect and exit
-        AdminNotice::success(sprintf(esc_html__('%d license key(s) updated successfully.', 'license-manager-for-woocommerce'), $count));
+        AdminNotice::success(
+            sprintf(
+                /* translators: %d: number of license keys */
+                esc_html__('%d license key(s) updated successfully.', 'license-manager-for-woocommerce'),
+                $count
+            )
+        );
+        
         wp_redirect(admin_url(sprintf('admin.php?page=%s', AdminMenus::LICENSES_PAGE)));
         exit();
     }
@@ -1087,8 +1101,12 @@ class LicensesList extends WP_List_Table
             }
         }
 
-        $message = sprintf(esc_html__('%d license key(s) permanently deleted.', 'license-manager-for-woocommerce'), $count);
-
+        $message = sprintf(
+            /* translators: %d: number of license keys */
+            esc_html__('%d license key(s) permanently deleted.', 'license-manager-for-woocommerce'),
+            $count
+        );
+        
         // Set the admin notice
         AdminNotice::success($message);
 

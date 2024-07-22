@@ -17,8 +17,7 @@ use LicenseManagerForWooCommerce\Models\Resources\License;
 
 defined('ABSPATH') || exit; ?>
 
-<h2><?php esc_html_e($heading);?></h2>
-
+<h2><?php echo esc_html($heading); ?></h2>
 <div style="margin-bottom: 40px;">
     <?php foreach ($data as $row): ?>
         <table class="td" cellspacing="0" style="width: 100%; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;" border="1">
@@ -48,8 +47,14 @@ defined('ABSPATH') || exit; ?>
                             ?>
                             <td class="td" style="text-align: left; vertical-align: middle; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;">
                                 <code><?php
-                                printf( '%s <strong>%s</strong>', $valid_until, $date );
+                                printf(
+                                    // translators: %1$s represents $valid_until, %2$s represents $date
+                                    esc_html__( '%1$s <strong>%2$s</strong>', 'your-text-domain' ),
+                                    esc_html( $valid_until ),
+                                    esc_html( $date )
+                                );
                                 ?></code>
+
                             </td>
                         <?php endif; ?>
                     </tr>

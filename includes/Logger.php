@@ -109,13 +109,13 @@ class Logger
         }
 
         if (!empty($label)) {
-            $label = json_encode($label . "\n") . ', ';
+            $label = wp_json_encode($label . "\n") . ', ';
         }
 
         $object_str = self::objectToString($object, true);
 
         add_action(is_admin() ? 'admin_footer' : 'wp_footer', function () use (&$object_str, &$label) {
-            ?><script type="text/javascript">console.log(<?= $label . $object_str; ?>);</script><?php
+            ?><script type="text/javascript">console.log(<?= wp_json_encode($label . $object_str); ?>);</script><?php
         }, 65535);
     }
 

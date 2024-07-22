@@ -80,7 +80,7 @@ class GeneratorsList extends WP_List_Table
      */
     public function no_items()
     {
-        _e('No generators found.', 'license-manager-for-woocommerce');
+        esc_html_e('No generators found.', 'license-manager-for-woocommerce');
     }
 
     /**
@@ -116,8 +116,12 @@ class GeneratorsList extends WP_List_Table
             );
         }
 
-        $actions['id'] = sprintf(__('ID: %d', 'license-manager-for-woocommerce'), intval($item['id']));
-
+        $actions['id'] = sprintf(
+            /* translators: %d is the ID number of the item */
+            __('ID: %d', 'license-manager-for-woocommerce'),
+            intval($item['id'])
+        );
+        
         if (!apply_filters('lmfwc_get_assigned_products', $item['id'])) {
             $actions['delete'] = sprintf(
                 '<a href="?page=%s&action=%s&id=%s&_wpnonce=%s">%s</a>',
@@ -404,8 +408,14 @@ class GeneratorsList extends WP_List_Table
         $result = GeneratorResourceRepository::instance()->delete($generatorsToDelete);
 
         if ($result) {
-            AdminNotice::success(sprintf(__('%d generator(s) permanently deleted.', 'license-manager-for-woocommerce'), $result));
-
+            AdminNotice::success(
+                sprintf(
+                    /* translators: %d is the number of generators deleted */
+                    __('%d generator(s) permanently deleted.', 'license-manager-for-woocommerce'),
+                    intval($result)
+                )
+            );
+            
             wp_redirect(
                 admin_url(
                     sprintf('admin.php?page=%s', AdminMenus::GENERATORS_PAGE)

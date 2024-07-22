@@ -269,18 +269,19 @@ class Order
         if (!wp_style_is('lmfwc_admin_css', $list = 'enqueued' )) {
             wp_enqueue_style('lmfwc_admin_css', LMFWC_CSS_URL . 'main.css');
         }
-
-        echo wc_get_template_html(
-            'myaccount/lmfwc-license-keys.php',
-            array(
-                'heading'       => apply_filters('lmfwc_license_keys_table_heading', null),
-                'valid_until'   => apply_filters('lmfwc_license_keys_table_valid_until', null),
-                'data'          => $data,
-                'date_format'   => lmfwc_expiration_format(),
-                'args'          => apply_filters('lmfwc_template_args_myaccount_license_keys', array())
-            ),
-            '',
-            LMFWC_TEMPLATES_DIR
+        echo wp_kses_post(
+            wc_get_template_html(
+                'myaccount/lmfwc-license-keys.php',
+                array(
+                    'heading'       => apply_filters('lmfwc_license_keys_table_heading', null),
+                    'valid_until'   => apply_filters('lmfwc_license_keys_table_valid_until', null),
+                    'data'          => $data,
+                    'date_format'   => lmfwc_expiration_format(),
+                    'args'          => apply_filters('lmfwc_template_args_myaccount_license_keys', array())
+                ),
+                '',
+                LMFWC_TEMPLATES_DIR
+            )
         );
 
     }
@@ -317,12 +318,12 @@ class Order
         if (!($item instanceof WC_Order_Item_Product)) {
             return;
         }
-
+    
         // The product does not exist anymore
         if (!$product) {
             return;
         }
-
+    
         /** @var LicenseResourceModel[] $licenses */
         $licenses = LicenseResourceRepository::instance()->findAllBy(
             array(
@@ -330,64 +331,62 @@ class Order
                 'product_id' => $product->get_id()
             )
         );
-
+    
         // No license keys? Nothing to do...
         if (!$licenses) {
             return;
         }
-
-        $html = sprintf('<p>%s:</p>', __('The following license keys have been sold by this order', 'license-manager-for-woocommerce'));
+    
+        $html = sprintf('<p>%s:</p>', esc_html__('The following license keys have been sold by this order', 'license-manager-for-woocommerce'));
         $html .= '<ul class="lmfwc-license-list">';
-
+    
         if (!Settings::get('lmfwc_hide_license_keys')) {
             /** @var LicenseResourceModel $license */
             foreach ($licenses as $license) {
                 $html .= sprintf(
                     '<li></span> <code class="lmfwc-placeholder">%s</code></li>',
-                    $license->getDecryptedLicenseKey()
+                    esc_html($license->getDecryptedLicenseKey())
                 );
             }
-
+    
             $html .= '</ul>';
-
-            $html .= '<span class="lmfwc-txt-copied-to-clipboard" style="display: none">' . __('Copied to clipboard', 'license-manager-for-woocommerce') . '</span>';
-        }
-
-        else {
+    
+            $html .= '<span class="lmfwc-txt-copied-to-clipboard" style="display: none">' . esc_html__('Copied to clipboard', 'license-manager-for-woocommerce') . '</span>';
+        } else {
             /** @var LicenseResourceModel $license */
             foreach ($licenses as $license) {
                 $html .= sprintf(
                     '<li><code class="lmfwc-placeholder empty" data-id="%d"></code></li>',
-                    $license->getId()
+                    esc_attr($license->getId())
                 );
             }
-
+    
             $html .= '</ul>';
             $html .= '<p>';
-
+    
             $html .= sprintf(
                 '<a class="button lmfwc-license-keys-show-all" data-order-id="%d">%s</a>',
                 $item->get_order_id(),
-                __('Show license key(s)', 'license-manager-for-woocommerce')
+                esc_html__('Show license key(s)', 'license-manager-for-woocommerce')
             );
-
+    
             $html .= sprintf(
                 '<a class="button lmfwc-license-keys-hide-all" data-order-id="%d">%s</a>',
                 $item->get_order_id(),
-                __('Hide license key(s)', 'license-manager-for-woocommerce')
+                esc_html__('Hide license key(s)', 'license-manager-for-woocommerce')
             );
-
+    
             $html .= sprintf(
                 '<img class="lmfwc-spinner" alt="%s" src="%s">',
-                __('Please wait...', 'license-manager-for-woocommerce'),
-                LicensesList::SPINNER_URL
+                esc_attr__('Please wait...', 'license-manager-for-woocommerce'),
+                esc_url(LicensesList::SPINNER_URL)
             );
-
-            $html .= '<span class="lmfwc-txt-copied-to-clipboard" style="display: none">' . __('Copied to clipboard', 'license-manager-for-woocommerce') . '</span>';
-
+    
+            $html .= '<span class="lmfwc-txt-copied-to-clipboard" style="display: none">' . esc_html__('Copied to clipboard', 'license-manager-for-woocommerce') . '</span>';
+    
             $html .= '</p>';
         }
-
-        echo $html;
-    }
+    
+       echo wp_kses($html, lmfwc_shapeSpace_allowed_html());
+    }    
 }

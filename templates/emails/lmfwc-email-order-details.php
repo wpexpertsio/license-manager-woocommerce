@@ -17,17 +17,18 @@ defined('ABSPATH') || exit; ?>
 
 <h2>
     <?php
-    /* translators: %s: Order ID. */
-    echo wp_kses_post(
-        sprintf(
-            __(
-                '(Order #%s)', 'license-manager-for-woocommerce') . ' (<time datetime="%s">%s</time>)',
+        echo wp_kses_post(
+            sprintf(
+                /* translators: %1$s: Order ID, %2$s: Date created in ISO 8601 format, %3$s: Date created formatted for display */
+                __(
+                    '(Order #%1$s) (<time datetime="%2$s">%3$s</time>)',
+                    'license-manager-for-woocommerce'
+                ),
                 $order->get_order_number(),
                 $order->get_date_created()->format('c'),
-                wc_format_datetime($order->get_date_created()
+                wc_format_datetime($order->get_date_created())
             )
-        )
-    );
+        );
     ?>
 </h2>
 
@@ -42,16 +43,16 @@ defined('ABSPATH') || exit; ?>
         </thead>
         <tbody>
             <?php
-            echo wc_get_email_order_items(
-                $order,
-                array(
-                    'show_sku'      => false,
-                    'show_image'    => false,
-                    'image_size'    => array(32, 32),
-                    'plain_text'    => $plain_text,
-                    'sent_to_admin' => false,
-                )
-            );
+                echo wp_kses_post( wc_get_email_order_items(
+                    $order,
+                    array(
+                        'show_sku'      => false,
+                        'show_image'    => false,
+                        'image_size'    => array(32, 32),
+                        'plain_text'    => $plain_text,
+                        'sent_to_admin' => false,
+                    )
+                ) );
             ?>
         </tbody>
         <tfoot>

@@ -10,9 +10,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @hooked WC_Emails::email_header() Output the email header
  */
 do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
-
-    <p><?php printf( __( 'The preorder #%d has been fulfilled. Order Details:', 'license-manager-for-woocommerce' ), $order->get_order_number() ); ?></p>
-
+    <p><?php 
+        printf(
+            /* translators: %d is the order number */
+            esc_html__( 'The preorder #%d has been fulfilled. Order Details:', 'license-manager-for-woocommerce' ),
+            esc_html( $order->get_order_number() )
+        );
+    ?>
+    </p>
 <?php
 /**
  * @hooked WC_Emails::order_details() Shows the order details table.

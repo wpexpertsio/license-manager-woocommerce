@@ -10,7 +10,7 @@ defined('ABSPATH') || exit;
 
     <?php if (!empty($logo)) : ?>
         <div style="margin-bottom: 30px;">
-            <img alt="Logo" src="<?php echo $logo; ?>" style="max-width: 100px; display: block; margin: 0 auto;">
+        <img alt="Logo" src="<?php echo esc_url($logo); ?>" style="max-width: 100px; display: block; margin: 0 auto;">
         </div>
     <?php else : ?>
         <h3 style="text-align: center; color: #333;"><?php echo esc_html($title); ?></h3>
@@ -23,7 +23,16 @@ defined('ABSPATH') || exit;
         </h1>
 
         <p style="font-size: 16px; margin-bottom: 15px; margin-top: 0; color: #555;">
-            <?php printf(__('This document certifies the purchase of a license key for: <strong>%s</strong>.', 'license-manager-for-woocommerce'), esc_attr(wp_strip_all_tags($license_product_name))); ?>
+        <?php
+            printf(
+                 // Translators: Placeholder 1 is the license product name.
+                esc_html__(
+                    'This document certifies the purchase of a license key for: <strong>%s</strong>.',
+                    'license-manager-for-woocommerce'
+                ),
+                esc_html( wp_strip_all_tags( $license_product_name ) )
+            );
+        ?>
         </p>
 
         <p style="font-size: 16px; margin-bottom: 15px; margin-top: 0; color: #555;">

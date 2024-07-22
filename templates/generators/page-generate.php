@@ -29,8 +29,8 @@ defined('ABSPATH') || exit;
             <td>
                 <select id="generate__generator" name="generator_id" class="regular-text">
                     <?php foreach($generatorsDropdown as $generator): ?>
-                        <option value="<?php esc_attr_e($generator->getId()); ?>"><?php esc_attr_e($generator->getName()); ?></option>
-                    <?php endforeach; ?>
+                        <option value="<?php echo esc_attr($generator->getId()); ?>"><?php echo esc_html($generator->getName()); ?></option>
+                        <?php endforeach; ?>
                 </select>
                 <p class="description"><?php esc_html_e('The selected generator\'s rules will be used to generate the license keys.', 'license-manager-for-woocommerce');?></p>
             </td>

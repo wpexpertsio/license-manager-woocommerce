@@ -90,9 +90,16 @@ class License
                 $_POST['times_activated_max']
             );
         } catch (Exception $e) {
-            AdminNotice::error(__($e->getMessage(), 'license-manager-for-woocommerce'));
-            wp_redirect(sprintf('admin.php?page=%s&action=import', AdminMenus::LICENSES_PAGE));
+            AdminNotice::error(
+                sprintf(
+                    // Translators: Error message displayed when an exception is thrown.
+                    __('Error: %s', 'license-manager-for-woocommerce'),
+                    $e->getMessage()
+                )
+            );
+            wp_redirect(admin_url(sprintf('admin.php?page=%s&action=import', AdminMenus::LICENSES_PAGE)));
             exit();
+
         }
 
         // Redirect according to $result.
@@ -108,13 +115,15 @@ class License
                 apply_filters('lmfwc_stock_increase', $productId, $result['added']);
             }
 
-            // Display a success message
+            
             AdminNotice::success(
                 sprintf(
+                    // Translators: Success message displayed when license keys are added successfully.
                     __('%d license key(s) added successfully.', 'license-manager-for-woocommerce'),
                     intval($result['added'])
                 )
             );
+
             wp_redirect(sprintf('admin.php?page=%s&action=import', AdminMenus::LICENSES_PAGE));
             exit();
         }
@@ -131,14 +140,15 @@ class License
                 apply_filters('lmfwc_stock_increase', $productId, $result['added']);
             }
 
-            // Display a warning message
             AdminNotice::warning(
                 sprintf(
-                    __('%d key(s) have been imported, while %d key(s) were not imported.', 'license-manager-for-woocommerce'),
+                    // Translators: Warning message displayed when importing license keys, indicating the number of keys imported successfully and failed.
+                    __('%1$d key(s) have been imported successfully, while %2$d key(s) failed to import.', 'license-manager-for-woocommerce'),
                     intval($result['added']),
                     intval($result['failed'])
                 )
             );
+
             wp_redirect(sprintf('admin.php?page=%s&action=import', AdminMenus::LICENSES_PAGE));
             exit();
         }
@@ -327,11 +337,16 @@ class License
      */
     public function showLicenseKey()
     {
+        // Check if the current user has the required capability
+        if (!current_user_can('manage_woocommerce')) {
+            wp_die(esc_html__('Invalid request.', 'license-manager-for-woocommerce'));
+        }
+
         // Validate request.
         check_ajax_referer('lmfwc_show_license_key', 'show');
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            wp_die(__('Invalid request.', 'license-manager-for-woocommerce'));
+            wp_die(esc_html__('Invalid request.', 'license-manager-for-woocommerce'));
         }
 
         /** @var LicenseResourceModel $license */
@@ -347,11 +362,16 @@ class License
      */
     public function showAllLicenseKeys()
     {
+        // Check if the current user has the required capability
+        if (!current_user_can('manage_woocommerce')) {
+            wp_die(esc_html__('Invalid request.', 'license-manager-for-woocommerce'));
+        }
+
         // Validate request.
         check_ajax_referer('lmfwc_show_all_license_keys', 'show_all');
 
         if ($_SERVER['REQUEST_METHOD'] != 'POST') {
-            wp_die(__('Invalid request.', 'license-manager-for-woocommerce'));
+            wp_die(esc_html__('Invalid request.', 'license-manager-for-woocommerce'));
         }
 
         $licenseKeysIds = array();

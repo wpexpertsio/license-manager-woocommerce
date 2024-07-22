@@ -100,10 +100,11 @@ class Import
         if (count($duplicateLicenseKeys) > 0) {
             AdminNotice::warning(
                 sprintf(
+                    // Translators: Warning message displayed when license keys are skipped because they already exist.
                     __('%d license key(s) skipped because they already exist.', 'license-manager-for-woocommerce'),
                     count($duplicateLicenseKeys)
                 )
-            );
+            );            
 
             if (count($licenseKeys) === 0) {
                 wp_redirect(

@@ -259,8 +259,10 @@ class Generator
             $generator
         );
 
-        // Show message and redirect.
+        // Translators: Placeholder 1 is replaced with the number of license keys generated.
         AdminNotice::success(sprintf(__('Successfully generated %d license key(s).', 'license-manager-for-woocommerce'), $amount));
+
+        // Redirect to the generators page after generating license keys.
         wp_redirect(admin_url(sprintf('admin.php?page=%s&action=generate', AdminMenus::GENERATORS_PAGE)));
         exit();
     }

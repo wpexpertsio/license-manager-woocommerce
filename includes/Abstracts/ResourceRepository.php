@@ -85,25 +85,36 @@ abstract class ResourceRepository extends Singleton implements RepositoryInterfa
     public function insert($data)
     {
         global $wpdb;
-
+    
+        // Prepare meta data
         $meta = array(
             'created_at' => gmdate('Y-m-d H:i:s'),
             'created_by' => get_current_user_id()
         );
-        
-        // Pass the data by reference and sanitize its contents
-        $this->sanitize($data);
-        if ( $wpdb->prefix . Setup::ACTIVATIONS_TABLE_NAME == $this->table ) {
+    
+        // Customize meta data based on table
+        if ($wpdb->prefix . Setup::ACTIVATIONS_TABLE_NAME == $this->table) {
             unset($meta['created_by']);
         }
-        $insert = $wpdb->insert($this->table, array_merge($data, $meta));
-
-        if (!$insert) {
-            return false;
+    
+        // Sanitize input data
+        $this->sanitize($data);
+    
+        // Combine data and meta for insertion
+        $data = array_merge($data, $meta);
+    
+        // Perform the insertion using $wpdb->insert()
+        $inserted = $wpdb->insert($this->table, $data);
+    
+        if (!$inserted) {
+            return false; // Insertion failed
         }
-        
+    
+        // Return the inserted record by its ID
         return $this->find($wpdb->insert_id);
     }
+    
+    
 
 
     /**

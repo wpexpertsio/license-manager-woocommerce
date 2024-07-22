@@ -23,8 +23,9 @@ class CustomerPreorderComplete extends WC_Email
         $this->customer_email = true;
         $this->heading        = __('Preorder complete', 'license-manager-for-woocommerce');
 
-        // translators: placeholder is {blogname}, a variable that will be substituted when email is sent out
+       
         $this->subject = sprintf(
+            // translators: placeholder is {blogname}, a variable that will be substituted when email is sent out
             _x(
                 '[%s] - Your preorder has arrived!',
                 'Default email subject for completed pre-order emails sent to the customer',

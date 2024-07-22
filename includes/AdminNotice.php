@@ -43,9 +43,9 @@ class AdminNotice
             if ($messages && is_array($messages)) {
                 foreach ($messages as $message) {
                     echo sprintf(
-                        self::MESSAGE_DISMISSIBLE,
-                        $class,
-                        $message
+                        wp_kses(self::MESSAGE_DISMISSIBLE, lmfwc_shapeSpace_allowed_html()),
+                        esc_attr($class),
+                        wp_kses($message, lmfwc_shapeSpace_allowed_html())
                     );
                 }
 

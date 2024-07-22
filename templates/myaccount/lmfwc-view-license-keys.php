@@ -29,7 +29,7 @@ defined('ABSPATH') || exit; ?>
 
 if ( ! empty( $licenseKeys ) ): ?>
 
-<h2><?php _e('Your license keys', 'license-manager-for-woocommerce'); ?></h2>
+<h2><?php esc_html_e('Your license keys', 'license-manager-for-woocommerce'); ?></h2>
 
 <?php foreach ($licenseKeys as $productId => $licenseKeyData): ?>
     <?php $product = wc_get_product($productId); ?>
@@ -37,19 +37,19 @@ if ( ! empty( $licenseKeys ) ): ?>
     <h3 class="product-name">
         <?php if ($product): ?>
             <a href="<?php echo esc_url(get_post_permalink($productId)); ?>">
-                <span><?php echo ($licenseKeyData['name']); ?></span>
+                <span><?php echo esc_html($licenseKeyData['name']); ?></span>
             </a>
         <?php else: ?>
-            <span><?php echo __('Product', 'license-manager-for-woocommerce') . ' #' . $productId; ?></span>
+            <span><?php echo esc_html(__('Product', 'license-manager-for-woocommerce') . ' #' . $productId); ?></span>
         <?php endif; ?>
     </h3>
 
     <table class="shop_table shop_table_responsive my_account_orders">
         <thead>
             <tr>
-                <th class="license-key"><?php _e('License key', 'license-manager-for-woocommerce'); ?></th>
-                <th class="activation"><?php _e('Activation status', 'license-manager-for-woocommerce'); ?></th>
-                <th class="valid-until"><?php _e('Valid until', 'license-manager-for-woocommerce'); ?></th>
+                <th class="license-key"><?php esc_html_e('License key', 'license-manager-for-woocommerce'); ?></th>
+                <th class="activation"><?php esc_html_e('Activation status', 'license-manager-for-woocommerce'); ?></th>
+                <th class="valid-until"><?php esc_html_e('Valid until', 'license-manager-for-woocommerce'); ?></th>
                 <th class="actions"></th>
             </tr>
         </thead>
@@ -64,39 +64,39 @@ if ( ! empty( $licenseKeys ) ): ?>
                 $order             = wc_get_order($license->getOrderId());
                 ?>
                 <tr>
-                    <td><span class="lmfwc-myaccount-license-key"><?php echo $license->getDecryptedLicenseKey(); ?></span></td>
+                    <td><span class="lmfwc-myaccount-license-key"><?php echo esc_html($license->getDecryptedLicenseKey()); ?></span></td>
                     <td>
-                        <span><?php esc_html_e($timesActivated); ?></span>
+                        <span><?php echo esc_html($timesActivated); ?></span>
                         <span>/</span>
-                        <span><?php echo $timesActivatedMax; ?></span>
+                        <span><?php echo esc_html($timesActivatedMax); ?></span>
                     </td>
                     <td><?php
                     if ($license->getExpiresAt()) {
-                        printf('<b>%s</b>', wp_date(lmfwc_expiration_format(), strtotime($license->getExpiresAt())));
+                        printf('<b>%s</b>', esc_html(wp_date(lmfwc_expiration_format(), strtotime($license->getExpiresAt()))));
                     } elseif ($license->getValidFor()) {
                         $validDate = date('Y-m-d', strtotime($order->get_date_paid() . ' + ' . $license->getValidFor() . ' days'));
-                        printf('<b>%s</b>', wp_date(lmfwc_expiration_format(), strtotime($validDate)));
+                        printf('<b>%s</b>', esc_html(wp_date(lmfwc_expiration_format(), strtotime($validDate))));
                     } else {
-                     echo __('Never Expires', 'license-manager-for-woocommerce');
-                 }?>
-                 
-             </td>
-             <td class="license-key-actions">
-                 
-               <a href="<?php echo esc_url( Controller::getAccountLicenseUrl( $license->getId() ) ); ?>" class="button view"><?php _e('View', 'license-manager-for-woocommerce');?></a>
+                        echo esc_html__('Never Expires', 'license-manager-for-woocommerce');
+                    } ?>
+                    
+                </td>
+                <td class="license-key-actions">
+                    
+                    <a href="<?php echo esc_url(Controller::getAccountLicenseUrl($license->getId())); ?>" class="button view"><?php esc_html_e('View', 'license-manager-for-woocommerce'); ?></a>
 
-               <a href="<?php echo esc_url($order->get_view_order_url()); ?>" class="button view"><?php _e('Order', 'license-manager-for-woocommerce');?></a>
-           </td>
-       </tr>
-   <?php endforeach; 
-   ?>
-</tbody>
-</table>
+                    <a href="<?php echo esc_url($order->get_view_order_url()); ?>" class="button view"><?php esc_html_e('Order', 'license-manager-for-woocommerce'); ?></a>
+                </td>
+            </tr>
+        <?php endforeach; 
+        ?>
+    </tbody>
+    </table>
 <?php endforeach; ?>
 
 <?php else: ?>
 
     <div class="woocommerce-Message woocommerce-Message--info woocommerce-info">
-        <?php _e( 'No licenses available yet', 'license-manager-for-woocommerce' ); ?>
+        <?php esc_html_e('No licenses available yet', 'license-manager-for-woocommerce'); ?>
     </div>
 <?php endif; ?>

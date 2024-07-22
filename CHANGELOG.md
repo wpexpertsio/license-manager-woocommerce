@@ -1,3 +1,7 @@
+##### 3.0.8 - 2024-07-22
+- Improved - Performance improvements and bug fixes
+- Improved - Enhanced stability and reliability
+
 ##### 3.0.7 - 2024-05-16
 - Improved - License page error handling if no license found.
 - Improved - API filter parameters for ammending data.

@@ -17,7 +17,7 @@ use LicenseManagerForWooCommerce\Models\Resources\License as LicenseResourceMode
 
 defined('ABSPATH') || exit; ?>
 
-<h2><?php esc_html_e($heading); ?></h2>
+<h2><?php echo esc_html($heading); ?></h2>
 
 <?php foreach ($data as $productId => $row): ?>
     <table class="shop_table">
@@ -43,7 +43,7 @@ defined('ABSPATH') || exit; ?>
                     }
                     ?>
                     <td>
-                        <span class="lmfwc-myaccount-license-key"><?php printf( '%s <strong>%s</strong>', $valid_until, $date ); ?></span>
+                    <span class="lmfwc-myaccount-license-key"><?php printf('%s <strong>%s</strong>', esc_html($valid_until), esc_html($date)); ?></span>
                     </td>
                 <?php endif; ?>
             </tr>

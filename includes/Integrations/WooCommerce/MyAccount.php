@@ -145,21 +145,22 @@ class MyAccount
             }
             $activations = apply_filters('lmfwc_get_license_activations', $license->getId());
 
-
-
-            echo wc_get_template_html(
-                'myaccount/single-table-activations.php',
-                array(
-                    'license'                    => $license,
-                    'license_key'                => $licenseKey,
-                    'product'                    => $product,
-                    'order'                      => $order,
-                    'date_format'                => $dateFormat,
-                    'activations'                => $activations,
-                    'nonce'                      => wp_create_nonce( 'lmfwc_nonce' ),
+            echo wp_kses(
+                wc_get_template_html(
+                    'myaccount/single-table-activations.php',
+                    array(
+                        'license'                    => $license,
+                        'license_key'                => $licenseKey,
+                        'product'                    => $product,
+                        'order'                      => $order,
+                        'date_format'                => $dateFormat,
+                        'activations'                => $activations,
+                        'nonce'                      => wp_create_nonce( 'lmfwc_nonce' ),
+                    ),
+                    '',
+                    LMFWC_TEMPLATES_DIR
                 ),
-                '',
-                LMFWC_TEMPLATES_DIR
+                lmfwc_shapeSpace_allowed_html()
             );
         }
 
@@ -206,16 +207,18 @@ class MyAccount
 
         if(  !$licenseID ) {
             $licenseKeys = apply_filters('lmfwc_get_all_customer_license_keys', $user_id);
-         
-            echo wc_get_template_html(
-                'myaccount/lmfwc-view-license-keys.php',
-                array(
-                    'dateFormat'  => get_option('date_format'),
-                    'licenseKeys' => $licenseKeys,
-                    'page'        => $page
+            echo wp_kses(
+                wc_get_template_html(
+                    'myaccount/lmfwc-view-license-keys.php',
+                    array(
+                        'dateFormat'  => get_option('date_format'),
+                        'licenseKeys' => $licenseKeys,
+                        'page'        => $page
+                    ),
+                    '',
+                    LMFWC_TEMPLATES_DIR
                 ),
-                '',
-                LMFWC_TEMPLATES_DIR
+                lmfwc_shapeSpace_allowed_html()
             );
         } 
         
@@ -228,30 +231,33 @@ class MyAccount
         );
 
          if ( is_wp_error( $license ) || !$license || $license->getUserId() != $user_id ) {
-            echo sprintf( '<h3>%s</h3>', __( 'Not found', 'license-manager-for-woocommerce' ) );
-            echo sprintf( '<p>%s</p>', __( 'The license you are looking for is not found.', 'license-manager-for-woocommerce' ) );
+            echo sprintf( '<h3>%s</h3>', esc_html__( 'Not found', 'license-manager-for-woocommerce' ) );
+            echo sprintf( '<p>%s</p>', esc_html__( 'The license you are looking for is not found.', 'license-manager-for-woocommerce' ) );
 
             return;
 
         }
 
         $decrypted = $license->getDecryptedLicenseKey();
-        if ( is_wp_error( $decrypted ) ) {
-            echo sprintf( '<p>%s</p>', $decrypted->get_error_message() );
-
+        if (is_wp_error($decrypted)) {
+            echo sprintf('<p>%s</p>', esc_html($decrypted->get_error_message()));
+        
             return;
         }
-        echo wc_get_template_html(
-            'myaccount/single.php',
-            array(
-                'license'     => $license,
-                'license_key' => $license->getDecryptedLicenseKey(),
-                'product'     => ! empty( $license->getProductId() ) ? wc_get_product( $license->getProductId() ) : null,
-                'order'       => ! empty( $license->getOrderId() ) ? wc_get_order( $license->getOrderId() ) : null,
-                'date_format' => get_option( 'date_format' ),
+        echo wp_kses(
+            wc_get_template_html(
+                'myaccount/single.php',
+                array(
+                    'license'     => $license,
+                    'license_key' => $license->getDecryptedLicenseKey(),
+                    'product'     => ! empty( $license->getProductId() ) ? wc_get_product( $license->getProductId() ) : null,
+                    'order'       => ! empty( $license->getOrderId() ) ? wc_get_order( $license->getOrderId() ) : null,
+                    'date_format' => get_option( 'date_format' ),
+                ),
+                '',
+                LMFWC_TEMPLATES_DIR
             ),
-            '',
-            LMFWC_TEMPLATES_DIR
+            lmfwc_shapeSpace_allowed_html()
         );
 
     }
@@ -291,7 +297,7 @@ class MyAccount
             array_push( $errors, __( 'Permission denied.', 'license-manager-for-woocommerce' ) );
         }
         if ( ! empty( $errors ) ) {
-            wp_die( $errors[0] );
+            wp_die(esc_html($errors[0]));
         }
 
         /**
@@ -369,7 +375,7 @@ class MyAccount
         
         $expiry_date = $license->getExpiresAt();
         if ( empty( $expiry_date ) ) {
-            $expiry_date = __( 'Never Expires', 'license-manager-for-woocommerce' );
+            $expiry_date = esc_html__( 'Never Expires', 'license-manager-for-woocommerce' );
         } else {
             $expiry_date = wp_date( lmfwc_expiration_format(), strtotime( $expiry_date ) );
         }
@@ -377,22 +383,22 @@ class MyAccount
 
         $license_details = array(
             array(
-                'title' => __( 'License ID', 'license-manager-for-woocommerce' ),
+                'title' => esc_html__( 'License ID', 'license-manager-for-woocommerce' ),
                 'value' => sprintf( '#%d', $license->getId() ),
             ),
             array(
-                'title' => __( 'License Key', 'license-manager-for-woocommerce' ),
+                'title' => esc_html__( 'License Key', 'license-manager-for-woocommerce' ),
                 'value' => $license->getDecryptedLicenseKey(),
             ),
             array(
-                'title' => __( 'Expiry Date', 'license-manager-for-woocommerce' ),
+                'title' => esc_html__( 'Expiry Date', 'license-manager-for-woocommerce' ),
                 'value' => $expiry_date,
             )
         );
         if ( $customer ) {
             $customer          = get_user_by( 'id', $customer );
             $license_details[] = array(
-                'title' => __( 'Licensee', 'license-manager-for-woocommerce' ),
+                'title' => esc_html__( 'Licensee', 'license-manager-for-woocommerce' ),
                 'value' => sprintf(
                     '%s (#%d - %s)',
                     $customer->display_name,
@@ -402,22 +408,22 @@ class MyAccount
             );
             if ( $order ) {
                 $license_details[] = array(
-                    'title' => __( 'Order ID', 'license-manager-for-woocommerce' ),
+                    'title' => esc_html__( 'Order ID', 'license-manager-for-woocommerce' ),
                     'value' => sprintf( '#%d', $order->get_id() ),
                 );
                 $license_details[] = array(
-                    'title' => __( 'Order Date', 'license-manager-for-woocommerce' ),
+                    'title' => esc_html__( 'Order Date', 'license-manager-for-woocommerce' ),
                     'value' => date_i18n( wc_date_format(), strtotime( $order->get_date_paid() ?? '' ) ),
                 );
             }
         }
         if ( $product ) {
             $license_details[] = array(
-                'title' => __( 'Product Name', 'license-manager-for-woocommerce' ),
+                'title' => esc_html__( 'Product Name', 'license-manager-for-woocommerce' ),
                 'value' => $product->get_formatted_name(),
             );
             $license_details[] = array(
-                'title' => __( 'Product URL', 'license-manager-for-woocommerce' ),
+                'title' => esc_html__( 'Product URL', 'license-manager-for-woocommerce' ),
                 'value' => $product->get_permalink(),
             );
         }

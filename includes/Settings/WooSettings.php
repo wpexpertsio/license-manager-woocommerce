@@ -57,7 +57,11 @@ class WooSettings
                 add_settings_error(
                     'lmfwc_settings_group_woocommerce',
                     'lmfwc_stock_update',
-                    sprintf(__('Successfully updated the stock of %d WooCommerce products.', 'license-manager-for-woocommerce'), $productsSynchronized),
+                    sprintf(
+                        /* translators: %d is the number of WooCommerce products synchronized */
+                        __('Successfully updated the stock of %d WooCommerce products.', 'license-manager-for-woocommerce'),
+                        $productsSynchronized
+                    ),
                     'success'
                 );
             } else {
@@ -209,7 +213,7 @@ class WooSettings
         $html .= '<button type="submit" class="lmfwc-field-upload-button button">'. __('Upload', 'license-manager-for-woocommerce') . '</button><button type="submit" class="lmfwc-field-remove-button button">&times;</button></div></div>';
         $html .= '</fieldset>';
 
-        echo nl2br($html);
+        echo wp_kses( $html, lmfwc_shapeSpace_allowed_html() );
     }
 
 
@@ -237,7 +241,7 @@ class WooSettings
         );
         $html .= '</fieldset>';
 
-        echo $html;
+        echo wp_kses( $html, lmfwc_shapeSpace_allowed_html() );
     }
 
    
@@ -265,7 +269,7 @@ class WooSettings
         );
         $html .= '</fieldset>';
 
-        echo $html;
+        echo wp_kses( $html, lmfwc_shapeSpace_allowed_html() );
     }
 
     /**
@@ -297,7 +301,7 @@ class WooSettings
         );
         $html .= '</fieldset>';
 
-        echo $html;
+        echo wp_kses( $html, lmfwc_shapeSpace_allowed_html() );
     }
 
     /**
@@ -327,7 +331,7 @@ class WooSettings
         );
         $html .= '</fieldset>';
 
-        echo $html;
+        echo wp_kses( $html, lmfwc_shapeSpace_allowed_html() );
     }
 
      /**
@@ -357,7 +361,7 @@ class WooSettings
         );
         $html .= '</fieldset>';
 
-        echo $html;
+        echo wp_kses( $html, lmfwc_shapeSpace_allowed_html() );
     }
 
 
@@ -407,7 +411,7 @@ class WooSettings
 
         $html .= '</table>';
 
-        echo $html;
+        echo wp_kses( $html, lmfwc_shapeSpace_allowed_html() );
     }
 
      /**
@@ -452,7 +456,7 @@ class WooSettings
             </fieldset>
         ';
 
-        echo $html;
+        echo wp_kses( $html, lmfwc_shapeSpace_allowed_html() );
     }
 
 }

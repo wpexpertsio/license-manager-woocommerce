@@ -67,7 +67,7 @@ function lmfwc_add_license($licenseKey, $licenseData = array())
     }
 
     if (apply_filters('lmfwc_duplicate', $licenseKey)) {
-        throw new Exception("The license key '{$licenseKey}' already exists.");
+        throw new Exception(esc_html("The license key '{$licenseKey}' already exists."));
     }
 
     if ($expiresAt !== null) {
@@ -201,7 +201,7 @@ function lmfwc_update_license($licenseKey, $licenseData)
     if (array_key_exists('license_key', $licenseData)) {
         // Check for possible duplicates
         if (apply_filters('lmfwc_duplicate', $licenseData['license_key'], $oldLicense->getId())) {
-            throw new Exception("The license key '{$licenseData['license_key']}' already exists.");
+            throw new Exception(esc_html("The license key '{$licenseData['license_key']}' already exists."));
         }
 
         $updateData['license_key'] = apply_filters('lmfwc_encrypt', $licenseData['license_key']);

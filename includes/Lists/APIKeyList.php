@@ -34,7 +34,7 @@ class APIKeyList extends WP_List_Table
      */
     public function no_items()
     {
-        _e('No keys found.', 'license-manager-for-woocommerce');
+        esc_html_e('No keys found.', 'license-manager-for-woocommerce');
     }
 
     /**
@@ -102,9 +102,10 @@ class APIKeyList extends WP_List_Table
 
         $output .= '</strong>';
 
-        // Get actions.
+       
         $actions = array(
-            'id' => sprintf(__('ID: %d', 'license-manager-for-woocommerce'), $keyId),
+             // Translators: %d is the key ID.
+            'id' => sprintf( __( 'ID: %d', 'license-manager-for-woocommerce' ), $keyId ),
         );
 
         if ($canEdit) {
@@ -202,9 +203,10 @@ class APIKeyList extends WP_List_Table
     {
         if (!empty($item['last_access'])) {
             $date = sprintf(
-                __('%1$s at %2$s', 'license-manager-for-woocommerce'),
-                date_i18n(wc_date_format(), strtotime($item['last_access'])),
-                date_i18n(wc_time_format(), strtotime($item['last_access']))
+                /* translators: 1: Date, 2: Time */
+                __( '%1$s at %2$s', 'license-manager-for-woocommerce' ),
+                date_i18n( wc_date_format(), strtotime( $item['last_access'] ) ),
+                date_i18n( wc_time_format(), strtotime( $item['last_access'] ) )
             );
 
             return apply_filters('woocommerce_api_key_last_access_datetime', $date, $item['last_access']);
@@ -389,11 +391,21 @@ class APIKeyList extends WP_List_Table
     private function revokeKeys()
     {
         if ($count = ApiKeyResourceRepository::instance()->delete((array)$_REQUEST['key'])) {
-            AdminNotice::success(sprintf(__('%d API key(s) permanently revoked.', 'license-manager-for-woocommerce'), $count));
+            AdminNotice::success(
+                sprintf(
+                    /* translators: %d is the count of API keys revoked */
+                    __('%d API key(s) permanently revoked.', 'license-manager-for-woocommerce'),
+                    $count
+                )
+            );
         }
 
         else {
-            AdminNotice::error(__('There was a problem revoking the API key(s).', 'license-manager-for-woocommerce'));
+            AdminNotice::error(
+                /* translators: Error message displayed when there is an issue revoking API keys */
+                __('There was a problem revoking the API key(s).', 'license-manager-for-woocommerce')
+            );
+            
         }
 
         wp_redirect(sprintf('admin.php?page=%s&tab=%2s&section=rest_api', AdminMenus::WC_SETTINGS_PAGE, AdminMenus::SETTINGS_PAGE));

@@ -29,35 +29,38 @@ class Templates
     public function addOrderDetails($order, $sentToAdmin, $plainText, $email)
     {
         if ($plainText) {
-            echo wc_get_template(
-                'emails/plain/lmfwc-email-order-details.php',
-                array(
-                    'order'         => $order,
-                    'sent_to_admin' => false,
-                    'plain_text'    => false,
-                    'email'         => $email,
-                    'args'          => apply_filters('lmfwc_template_args_emails_email_order_details', array())
-                ),
-                '',
-                LMFWC_TEMPLATES_DIR
+            echo wp_kses_post(
+                wc_get_template(
+                    'emails/plain/lmfwc-email-order-details.php',
+                    array(
+                        'order'         => $order,
+                        'sent_to_admin' => false,
+                        'plain_text'    => false,
+                        'email'         => $email,
+                        'args'          => apply_filters('lmfwc_template_args_emails_email_order_details', array())
+                    ),
+                    '',
+                    LMFWC_TEMPLATES_DIR
+                )
             );
-        }
-
-        else {
-            echo wc_get_template_html(
-                'emails/lmfwc-email-order-details.php',
-                array(
-                    'order'         => $order,
-                    'sent_to_admin' => false,
-                    'plain_text'    => false,
-                    'email'         => $email,
-                    'args'          => apply_filters('lmfwc_template_args_emails_email_order_details', array())
-                ),
-                '',
-                LMFWC_TEMPLATES_DIR
+        } else {
+            echo wp_kses_post(
+                wc_get_template_html(
+                    'emails/lmfwc-email-order-details.php',
+                    array(
+                        'order'         => $order,
+                        'sent_to_admin' => false,
+                        'plain_text'    => false,
+                        'email'         => $email,
+                        'args'          => apply_filters('lmfwc_template_args_emails_email_order_details', array())
+                    ),
+                    '',
+                    LMFWC_TEMPLATES_DIR
+                )
             );
         }
     }
+    
 
     /**
      * Adds basic order info to the email body.
@@ -70,40 +73,42 @@ class Templates
     public function addOrderLicenseKeys($order, $sentToAdmin, $plainText, $email)
     {
         if ($plainText) {
-            echo wc_get_template(
-                'emails/plain/lmfwc-email-order-license-keys.php',
-                array(
-                    'heading'       => apply_filters('lmfwc_license_keys_table_heading', null),
-                    'valid_until'   => apply_filters('lmfwc_license_keys_table_valid_until', null),
-                    'data'          => apply_filters('lmfwc_get_customer_license_keys', $order),
-                    'date_format'   => get_option('date_format'),
-                    'order'         => $order,
-                    'sent_to_admin' => false,
-                    'plain_text'    => false,
-                    'email'         => $email,
-                    'args'          => apply_filters('lmfwc_template_args_emails_order_license_keys', array())
-                ),
-                '',
-                LMFWC_TEMPLATES_DIR
+            echo wp_kses_post(
+                wc_get_template(
+                    'emails/plain/lmfwc-email-order-license-keys.php',
+                    array(
+                        'heading'       => apply_filters('lmfwc_license_keys_table_heading', null),
+                        'valid_until'   => apply_filters('lmfwc_license_keys_table_valid_until', null),
+                        'data'          => apply_filters('lmfwc_get_customer_license_keys', $order),
+                        'date_format'   => get_option('date_format'),
+                        'order'         => $order,
+                        'sent_to_admin' => false,
+                        'plain_text'    => false,
+                        'email'         => $email,
+                        'args'          => apply_filters('lmfwc_template_args_emails_order_license_keys', array())
+                    ),
+                    '',
+                    LMFWC_TEMPLATES_DIR
+                )
             );
-        }
-
-        else {
-            echo wc_get_template_html(
-                'emails/lmfwc-email-order-license-keys.php',
-                array(
-                    'heading'       => apply_filters('lmfwc_license_keys_table_heading', null),
-                    'valid_until'   => apply_filters('lmfwc_license_keys_table_valid_until', null),
-                    'data'          => apply_filters('lmfwc_get_customer_license_keys', $order),
-                    'date_format'   => get_option('date_format'),
-                    'order'         => $order,
-                    'sent_to_admin' => false,
-                    'plain_text'    => false,
-                    'email'         => $email,
-                    'args'          => apply_filters('lmfwc_template_args_emails_order_license_keys', array())
-                ),
-                '',
-                LMFWC_TEMPLATES_DIR
+        } else {
+            echo wp_kses_post(
+                wc_get_template_html(
+                    'emails/lmfwc-email-order-license-keys.php',
+                    array(
+                        'heading'       => apply_filters('lmfwc_license_keys_table_heading', null),
+                        'valid_until'   => apply_filters('lmfwc_license_keys_table_valid_until', null),
+                        'data'          => apply_filters('lmfwc_get_customer_license_keys', $order),
+                        'date_format'   => get_option('date_format'),
+                        'order'         => $order,
+                        'sent_to_admin' => false,
+                        'plain_text'    => false,
+                        'email'         => $email,
+                        'args'          => apply_filters('lmfwc_template_args_emails_order_license_keys', array())
+                    ),
+                    '',
+                    LMFWC_TEMPLATES_DIR
+                )
             );
         }
     }

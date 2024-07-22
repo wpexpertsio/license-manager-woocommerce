@@ -13,7 +13,7 @@ defined('ABSPATH') || exit;
 
 <?php if ($keyData): ?>
 
-    <form method="post" action="<?=admin_url('admin-post.php');?>">
+    <form method="post" action="<?=esc_url(admin_url('admin-post.php'));?>">
         <?php wp_nonce_field('lmfwc-api-key-update'); ?>
 
         <table class="form-table">

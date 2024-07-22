@@ -340,3 +340,6 @@ lmfwc-status-active {
     border: 1px solid #ccc;
     margin-bottom: 17px;
 }
+span.lmfwc-txt-copied-to-clipboard {
+    display: none;
+}

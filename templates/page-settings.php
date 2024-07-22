@@ -30,7 +30,7 @@ defined('ABSPATH') || exit;
 
     <?php if ($section == 'general'): ?>
 
-        <form action="<?php echo admin_url('options.php'); ?>" method="POST">
+        <form action="<?php echo esc_url(admin_url('options.php')); ?>" method="POST">
             <?php settings_fields('lmfwc_settings_group_general'); ?>
             <?php do_settings_sections('lmfwc_license_keys'); ?>
             <?php do_settings_sections('lmfwc_rest_api'); ?>
@@ -39,7 +39,7 @@ defined('ABSPATH') || exit;
 
     <?php elseif ($section === 'woocommerce'): ?>
 
-        <form action="<?php echo admin_url('options.php'); ?>" method="POST">
+        <form action="<?php echo esc_url(admin_url('options.php')); ?>" method="POST">
             <?php settings_fields('lmfwc_settings_group_woocommerce'); ?>
             <?php do_settings_sections('lmfwc_license_key_delivery'); ?>
             <?php do_settings_sections('lmfwc_branding'); ?>
@@ -65,7 +65,7 @@ defined('ABSPATH') || exit;
 
     <?php elseif ($section === 'tools'): ?>
 
-        <form action="<?php echo admin_url('options.php'); ?>" method="POST">
+        <form action="<?php echo esc_url(admin_url('options.php')); ?>" method="POST">
             <?php settings_fields('lmfwc_settings_group_tools'); ?>
             <?php do_settings_sections('lmfwc_export'); ?>
             <?php submit_button(); ?>

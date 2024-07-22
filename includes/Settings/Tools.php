@@ -186,36 +186,36 @@ class Tools
         );
         $html .= '</fieldset>';
 
-        echo $html;
+        echo wp_kses($html, lmfwc_shapeSpace_allowed_html());
     }
 
        public function fieldDatabaseMigration() {
         ?>
-        <h3><?php _e( 'Past Orders License Generator', 'license-manager-for-woocommerce' ); ?></h3>
-        <p><?php _e( 'This tool generates licenses for all past orders that doesn\'t have license assigned. Useful if you already have established shop and want to assign licenses to your existing orders.', 'license-manager-for-woocommerce' ); ?></p>
+        <h3><?php esc_html_e( 'Past Orders License Generator', 'license-manager-for-woocommerce' ); ?></h3>
+        <p><?php esc_html_e( 'This tool generates licenses for all past orders that doesn\'t have license assigned. Useful if you already have established shop and want to assign licenses to your existing orders.', 'license-manager-for-woocommerce' ); ?></p>
         <form class="lmfwc-tool-form" id="lmfwc-migration-tool" method="POST" action="">
             <div class="lmfwc-tool-form-row">
-                <label for="generator"><?php _e( 'Generator', 'license-manager-for-woocommerce' ); ?> <span class="required">*</span></label>
+                <label for="generator"><?php esc_html_e( 'Generator', 'license-manager-for-woocommerce' ); ?> <span class="required">*</span></label>
                 <select id="generator" name="generator" required>
                 </select>
             </div>
             <div class="lmfwc-tool-form-row">
                 <label>
                     <input type="checkbox" name="use_product_licensing_configuration" value="1">
-                    <small><?php _e( 'Use product settings where possible, e.g some products have their own licensing configuration settings.', 'license-manager-for-woocommerce' ); ?></small>
+                    <small><?php esc_html_e( 'Use product settings where possible, e.g some products have their own licensing configuration settings.', 'license-manager-for-woocommerce' ); ?></small>
                 </label>
             </div>
             <div class="lmfwc-tool-form-row lmfwc-tool-form-row-progress" style="display: none;">
                 <div class="lmfwc-tool-progress-bar">
                     <p class="lmfwc-tool-progress-bar-inner">&nbsp;</p>
                 </div>
-                <div class="lmfwc-tool-progress-info"><?php _e( 'Initializing...', 'license-manager-for-woocommerce' ); ?></div>
+                <div class="lmfwc-tool-progress-info"><?php esc_html_e( 'Initializing...', 'license-manager-for-woocommerce' ); ?></div>
             </div>
             <div class="lmfwc-tool-form-row">
                 <input type="hidden" name="id" value=""/>
                 <input type="hidden" name="identifier" value=""/>
                 <input type="hidden" name="tool" value="">
-                <button type="submit" class="button button-small button-primary"><?php _e( 'Process', 'license-manager-for-woocommerce' ); ?></button>
+                <button type="submit" class="button button-small button-primary"><?php esc_html_e( 'Process', 'license-manager-for-woocommerce' ); ?></button>
             </div>
         </form>
         <?php
@@ -223,31 +223,31 @@ class Tools
 
     public function fieldPastOrdersLicenseGenerator() {
         ?>
-        <h3><?php _e( 'Past Orders License Generator', 'license-manager-for-woocommerce' ); ?></h3>
-        <p><?php _e( 'This tool generates licenses for all past orders that doesn\'t have license assigned. Useful if you already have established shop and want to assign licenses to your existing orders.', 'license-manager-for-woocommerce' ); ?></p>
+        <h3><?php esc_html_e( 'Past Orders License Generator', 'license-manager-for-woocommerce' ); ?></h3>
+        <p><?php esc_html_e( 'This tool generates licenses for all past orders that doesn\'t have license assigned. Useful if you already have established shop and want to assign licenses to your existing orders.', 'license-manager-for-woocommerce' ); ?></p>
         <form class="lmfwc-tool-form" id="lmfwc-generate-tool" method="POST" action="">
             <div class="lmfwc-tool-form-row">
-                <label for="generator"><?php _e( 'Generator', 'license-manager-for-woocommerce' ); ?> <span class="required">*</span></label>
+                <label for="generator"><?php esc_html_e( 'Generator', 'license-manager-for-woocommerce' ); ?> <span class="required">*</span></label>
                 <select id="generator" name="generator" required>
                 </select>
             </div>
             <div class="lmfwc-tool-form-row">
                 <label>
                     <input type="checkbox" name="use_product_licensing_configuration" value="1">
-                    <small><?php _e( 'Use product settings where possible, e.g some products have their own licensing configuration settings.', 'license-manager-for-woocommerce' ); ?></small>
+                    <small><?php esc_html_e( 'Use product settings where possible, e.g some products have their own licensing configuration settings.', 'license-manager-for-woocommerce' ); ?></small>
                 </label>
             </div>
             <div class="lmfwc-tool-form-row lmfwc-tool-form-row-progress" style="display: none;">
                 <div class="lmfwc-tool-progress-bar">
                     <p class="lmfwc-tool-progress-bar-inner">&nbsp;</p>
                 </div>
-                <div class="lmfwc-tool-progress-info"><?php _e( 'Initializing...', 'license-manager-for-woocommerce' ); ?></div>
+                <div class="lmfwc-tool-progress-info"><?php esc_html_e( 'Initializing...', 'license-manager-for-woocommerce' ); ?></div>
             </div>
             <div class="lmfwc-tool-form-row">
                 <input type="hidden" name="id" value=""/>
                 <input type="hidden" name="identifier" value=""/>
                 <input type="hidden" name="tool" value="">
-                <button type="submit" class="button button-small button-primary"><?php _e( 'Process', 'license-manager-for-woocommerce' ); ?></button>
+                <button type="submit" class="button button-small button-primary"><?php esc_html_e( 'Process', 'license-manager-for-woocommerce' ); ?></button>
             </div>
         </form>
 

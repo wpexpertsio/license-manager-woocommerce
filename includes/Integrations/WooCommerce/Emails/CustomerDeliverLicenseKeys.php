@@ -23,8 +23,9 @@ class CustomerDeliverLicenseKeys extends WC_Email
         $this->customer_email = true;
         $this->heading        = __('License key delivery', 'license-manager-for-woocommerce');
 
-        // translators: placeholder is {blogname}, a variable that will be substituted when email is sent out
+       
         $this->subject = sprintf(
+             // translators: placeholder is {blogname}, a variable that will be substituted when email is sent out
             _x(
                 '[%s] - Your license keys are here!',
                 'Default email subject for resent license key emails sent to the customer',

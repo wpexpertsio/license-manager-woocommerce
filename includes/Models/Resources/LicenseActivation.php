@@ -48,7 +48,14 @@ class LicenseActivation extends AbstractResourceModel implements ModelInterface 
 		$this->source         = (int) $activation->source;
 		$this->ip_address     = $activation->ip_address;
 		$this->user_agent     = $activation->user_agent;
-		$this->meta_data      = $activation->meta_data ;
+        if ( !is_null( $activation->meta_data ) ) {
+            $this->meta_data = json_decode( $activation->meta_data, TRUE );
+            if(json_last_error() !== JSON_ERROR_NONE) {
+                $this->meta_data = $activation->meta_data;
+            }
+        } else {
+            $this->meta_data      = $activation->meta_data ;
+        }
 		$this->created_at     = $activation->created_at;
 		$this->updated_at     = $activation->updated_at;
 		$this->deactivated_at = $activation->deactivated_at;

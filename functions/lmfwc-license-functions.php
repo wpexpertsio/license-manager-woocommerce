@@ -447,8 +447,8 @@ function lmfwc_activate_license($licenseKey, $args)
         }
 
                 // Set metadata
-        if (isset($args['meta_data']) && is_array( $args['meta_data'] ) ) {
-            $activationParams['meta_data'] = $args['meta_data'];
+        if (isset($args['meta']) && is_array( $args['meta'] ) ) {
+            $activationParams['meta_data'] = wp_json_encode($args['meta']);
         }
 
                 // Store.

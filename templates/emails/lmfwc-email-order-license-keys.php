@@ -49,7 +49,7 @@ defined('ABSPATH') || exit; ?>
                                 <code><?php
                                 printf(
                                     // translators: %1$s represents $valid_until, %2$s represents $date
-                                    esc_html__( '%1$s <strong>%2$s</strong>', 'your-text-domain' ),
+                                    esc_html__( '%1$s %2$s', 'your-text-domain' ),
                                     esc_html( $valid_until ),
                                     esc_html( $date )
                                 );

@@ -251,6 +251,10 @@ class Order
      */
     public function showBoughtLicenses($order)
     {
+        // Check if the parameter is an order ID and get the WC_Order object if necessary
+        if (is_int($order)) {
+            $order = wc_get_order($order);
+        }
         // Return if the order isn't complete.
         if ($order->get_status() != 'completed'
             && ! $order->get_meta( 'lmfwc_order_complete')

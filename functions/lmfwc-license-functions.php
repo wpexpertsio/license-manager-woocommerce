@@ -477,6 +477,8 @@ function lmfwc_activate_license($licenseKey, $args)
             // Remove the hash and decrypt the license key
     unset($licenseData['hash']);
     $licenseData['licenseKey'] = $updatedLicense->getDecryptedLicenseKey();
+    $licenseData = apply_filters( 'lmfwc_activate_license_data', $licenseData );
+
     return $licenseData;
     }
 
